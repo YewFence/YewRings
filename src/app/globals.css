@@ -20,6 +20,13 @@
 
   /* Backdrop Blur 扩展 */
   --backdrop-blur-xs: 2px;
+
+  /* Typography 配置 - 针对深色玻璃背景优化 */
+  --color-prose-body: #cbd5e1; /* slate-300 */
+  --color-prose-headings: #f8fafc; /* slate-50 */
+  --color-prose-h2: #f1f5f9; /* slate-100 */
+  --color-prose-strong: #f1f5f9; /* slate-100 */
+  --color-prose-links: #67e8f9; /* cyan-300 */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -60,4 +67,43 @@ body {
   z-index: 50;
   opacity: 0.05; /* 调节这里改变噪点强度 */
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Typography/Prose 样式优化 - 针对深色玻璃背景 */
+.prose {
+  color: var(--color-prose-body);
+  max-width: 65ch;
+}
+
+.prose :where(code):not(:where([class~="not-prose"] *))::before,
+.prose :where(code):not(:where([class~="not-prose"] *))::after {
+  content: "";
+}
+
+.prose :where(h1):not(:where([class~="not-prose"] *)) {
+  color: var(--color-prose-headings);
+}
+
+.prose :where(h2):not(:where([class~="not-prose"] *)) {
+  color: var(--color-prose-h2);
+}
+
+.prose :where(h3, h4, h5, h6):not(:where([class~="not-prose"] *)) {
+  color: var(--color-prose-h2);
+}
+
+.prose :where(strong):not(:where([class~="not-prose"] *)) {
+  color: var(--color-prose-strong);
+  font-weight: 600;
+}
+
+.prose :where(a):not(:where([class~="not-prose"] *)) {
+  color: var(--color-prose-links);
+  text-decoration: underline;
+  text-decoration-color: rgba(103, 232, 249, 0.3);
+  transition: all 0.2s ease;
+}
+
+.prose :where(a):not(:where([class~="not-prose"] *)):hover {
+  text-decoration-color: rgba(103, 232, 249, 0.6);
 }

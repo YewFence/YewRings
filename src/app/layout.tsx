@@ -1,5 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import { Navbar } from "@/components/ui/Navbar";
 
 export const metadata: Metadata = {
   title: "My Liquid Space",
@@ -19,9 +20,12 @@ export default function RootLayout({
         
         {/* 2. 噪点层 (覆盖在背景之上，但内容之下) */}
         <div className="noise-overlay" />
+
+        {/* 导航栏 */}
+        <Navbar />
         
         {/* 3. 主要内容 */}
-        <main className="relative z-10">
+        <main className="relative z-10 pt-24 px-4">
           {children}
         </main>
       </body>
