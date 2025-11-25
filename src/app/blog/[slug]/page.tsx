@@ -1,6 +1,7 @@
 import { getPostData, getSortedPostsData } from "@/lib/mdx";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { GlassCard } from "@/components/ui/GlassCard";
+import { GlassButton } from "@/components/ui/GlassButton";
 import { ArrowLeft, Calendar } from "lucide-react";
 import Link from "next/link";
 
@@ -19,12 +20,11 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
   return (
     <div className="max-w-3xl mx-auto pb-20">
       {/* 返回按钮 */}
-      <Link 
-        href="/" 
-        className="inline-flex items-center text-slate-400 hover:text-white mb-8 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        返回首页
+      <Link href="/blog" className="inline-block mb-8">
+        <GlassButton variant="secondary" size="sm">
+          <ArrowLeft className="w-4 h-4" />
+          返回列表
+        </GlassButton>
       </Link>
 
       {/* 头部信息 */}
