@@ -24,8 +24,11 @@ export const Navbar = () => {
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
-        className="pointer-events-auto flex items-center gap-1 p-2 rounded-full border border-white/10 bg-black/20 backdrop-blur-xl shadow-2xl ring-1 ring-white/5"
+        className="pointer-events-auto relative flex items-center gap-1 p-2 rounded-full border border-white/10 bg-black/25 backdrop-blur-xl shadow-2xl shadow-black/40"
       >
+        {/* 新增：顶部高光元素 */}
+        <div className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
