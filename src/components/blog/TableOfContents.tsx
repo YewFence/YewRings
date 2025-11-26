@@ -62,37 +62,29 @@ export const TableOfContents = ({ headings }: TOCProps) => {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const isScrollingRef = useRef(false);
 
-  useEffect(() => {
-    // 当activeSlug变化时，自动展开当前分支，收缩其他分支
-    if (activeSlug) {
-      const activeParents = getParentHeadings(headings, activeSlug);
-      const currentTopLevel = getTopLevelParent(headings, activeSlug);
+  // 更新折叠状态的函数
+  const updateCollapsed = (slug: string) => {
+    const activeParents = getParentHeadings(headings, slug);
+    const currentTopLevel = getTopLevelParent(headings, slug);
 
-      // 获取所有 level 2 标题
-      const allTopLevelSlugs = headings
-        .filter((h) => h.level === 2)
-        .map((h) => h.slug);
+    const allTopLevelSlugs = headings
+      .filter((h) => h.level === 2)
+      .map((h) => h.slug);
 
-      setCollapsed(() => {
-        const newSet = new Set<string>();
-        // 收缩所有不是当前分支的顶级标题
-        allTopLevelSlugs.forEach((slug) => {
-          if (slug !== currentTopLevel) {
-            newSet.add(slug);
-          }
-        });
-        // 确保当前分支的父标题都展开
-        activeParents.forEach((slug) => newSet.delete(slug));
-        return newSet;
+    setCollapsed(() => {
+      const newSet = new Set<string>();
+      allTopLevelSlugs.forEach((s) => {
+        if (s !== currentTopLevel) {
+          newSet.add(s);
+        }
       });
-    }
-  }, [activeSlug, headings]);
+      activeParents.forEach((s) => newSet.delete(s));
+      return newSet;
+    });
+  };
 
   useEffect(() => {
-    const handleScroll = () => {
-      // 点击导航滚动期间不更新
-      if (isScrollingRef.current) return;
-
+    const updateActiveHeading = () => {
       const viewportMiddle = window.scrollY + window.innerHeight / 2;
 
       let closestHeading: string | null = null;
@@ -106,7 +98,43 @@ export const TableOfContents = ({ headings }: TOCProps) => {
         const elementTop = window.scrollY + rect.top;
         const distance = Math.abs(elementTop - viewportMiddle);
 
-        // 只考虑在视口中线上方或刚好在中线的标题
+        if (elementTop <= viewportMiddle && distance < closestDistance) {
+          closestDistance = distance;
+          closestHeading = heading.slug;
+        }
+      }
+
+      if (closestHeading && closestHeading !== activeSlug) {
+        setActiveSlug(closestHeading);
+        // 只有在非滚动状态下才更新折叠
+        if (!isScrollingRef.current) {
+          updateCollapsed(closestHeading);
+        }
+      }
+    };
+
+    const handleScroll = () => {
+      if (isScrollingRef.current) return;
+      updateActiveHeading();
+    };
+
+    const handlePauseScroll = () => {
+      isScrollingRef.current = true;
+    };
+
+    const handleResumeScroll = () => {
+      isScrollingRef.current = false;
+      // 恢复后更新当前位置并触发折叠
+      const viewportMiddle = window.scrollY + window.innerHeight / 2;
+      let closestHeading: string | null = null;
+      let closestDistance = Infinity;
+
+      for (const heading of headings) {
+        const el = document.getElementById(heading.slug);
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
+        const elementTop = window.scrollY + rect.top;
+        const distance = Math.abs(elementTop - viewportMiddle);
         if (elementTop <= viewportMiddle && distance < closestDistance) {
           closestDistance = distance;
           closestHeading = heading.slug;
@@ -115,15 +143,21 @@ export const TableOfContents = ({ headings }: TOCProps) => {
 
       if (closestHeading) {
         setActiveSlug(closestHeading);
+        updateCollapsed(closestHeading);
       }
     };
 
-    // 初始化时执行一次
-    handleScroll();
+    updateActiveHeading();
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [headings]);
+    window.addEventListener('toc-pause-scroll', handlePauseScroll);
+    window.addEventListener('toc-resume-scroll', handleResumeScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('toc-pause-scroll', handlePauseScroll);
+      window.removeEventListener('toc-resume-scroll', handleResumeScroll);
+    };
+  }, [headings, activeSlug]);
 
   // 点击导航项时滚动到目标位置
   const scrollToHeading = (slug: string) => {

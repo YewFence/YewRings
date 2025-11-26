@@ -24,10 +24,25 @@ export const ScrollToTopButton = () => {
   };
 
   const scrollToTop = () => {
+    // 通知 TOC 暂停滚动监听
+    window.dispatchEvent(new CustomEvent('toc-pause-scroll'));
+
+    // 确保滚动到页面最顶部
     window.scrollTo({
       top: 0,
+      left: 0,
       behavior: "smooth",
     });
+
+    // 检测滚动完成后通知 TOC 恢复
+    const checkScrollEnd = () => {
+      if (window.scrollY <= 10) {
+        window.dispatchEvent(new CustomEvent('toc-resume-scroll'));
+      } else {
+        requestAnimationFrame(checkScrollEnd);
+      }
+    };
+    requestAnimationFrame(checkScrollEnd);
   };
 
   useEffect(() => {
