@@ -1,6 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import { visit } from 'unist-util-visit';
+import Slugger from 'github-slugger';
+import type { Node } from 'unist';
 
 const postsDirectory = path.join(process.cwd(), 'content/posts');
 
@@ -10,6 +15,50 @@ export type PostMeta = {
   date: string;
   description: string;
 };
+
+export type Heading = {
+  level: number;
+  text: string;
+  slug: string;
+};
+
+// 扩展Node类型以包含value属性
+interface TextNode extends Node {
+  value: string;
+}
+
+// 扩展Node类型以包含depth和children属性
+interface HeadingNode extends Node {
+  depth: number;
+  children: TextNode[];
+}
+
+/**
+ * 从 MDX 内容中提取标题
+ * @param content MDX 文件内容
+ * @returns 标题数组
+ */
+function extractHeadings(content: string): Heading[] {
+  const slugger = new Slugger();
+  const tree = unified().use(remarkParse).parse(content);
+  const headings: Heading[] = [];
+
+  visit(tree, 'heading', (node: HeadingNode) => {
+    // 我们只关心 h2, h3, h4
+    if (node.depth > 1 && node.depth < 5) {
+      // 从子节点中提取纯文本
+      const text = node.children.map((child) => child.value).join('');
+      headings.push({
+        level: node.depth,
+        text,
+        slug: slugger.slug(text),
+      });
+    }
+  });
+
+  return headings;
+}
+
 
 export function getSortedPostsData(): PostMeta[] {
   // 如果目录不存在，防止报错
@@ -37,9 +86,12 @@ export function getPostData(slug: string) {
   const fullPath = path.join(postsDirectory, `${slug}.mdx`);
   const fileContents = fs.readFileSync(fullPath, 'utf8');
   const { content, data } = matter(fileContents);
+
+  const headings = extractHeadings(content);
   
   return {
     content,
     meta: data as Omit<PostMeta, 'slug'>,
+    headings,
   };
 }
