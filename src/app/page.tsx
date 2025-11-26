@@ -7,7 +7,7 @@ export default function Home() {
       
       {/* 标题区域 */}
       <div className="text-center space-y-4 max-w-2xl">
-        <h1 className="text-5xl md:text-7xl font-bold bg-clip-text text-transparent bg-linear-to-br from-white to-white/60 tracking-tight">
+        <h1 className="text-5xl md:text-7xl font-bold tracking-tight py-4">
           Liquid Blog
         </h1>
         <p className="text-lg text-slate-300/80">
