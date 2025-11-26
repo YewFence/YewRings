@@ -7,6 +7,10 @@ import { TableOfContents } from "@/components/blog/TableOfContents";
 import { ArrowLeft, Calendar } from "lucide-react";
 import Link from "next/link";
 import rehypeSlug from "rehype-slug";
+import rehypeKatex from "rehype-katex";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import "katex/dist/katex.min.css";
 
 // 预生成静态路径 (SSG) - 对SEO非常重要
 export async function generateStaticParams() {
@@ -59,7 +63,8 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
                 source={content}
                 options={{
                   mdxOptions: {
-                    rehypePlugins: [rehypeSlug],
+                    remarkPlugins: [remarkGfm, remarkMath],
+                    rehypePlugins: [rehypeSlug, rehypeKatex],
                   },
                 }}
               />
