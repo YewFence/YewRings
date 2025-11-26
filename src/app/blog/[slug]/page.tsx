@@ -2,6 +2,7 @@ import { getPostData, getSortedPostsData } from "@/lib/mdx";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { GlassButton } from "@/components/ui/GlassButton";
+import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { ArrowLeft, Calendar } from "lucide-react";
 import Link from "next/link";
 
@@ -48,6 +49,9 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           <MDXRemote source={content} />
         </article>
       </GlassCard>
+
+      {/* 回到顶部按钮 */}
+      <ScrollToTopButton />
     </div>
   );
 }
