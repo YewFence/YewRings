@@ -4,7 +4,13 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import { GlassButton } from "@/components/ui/GlassButton";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { TableOfContents } from "@/components/blog/TableOfContents";
-import { ArrowLeft, Calendar } from "lucide-react";
+import {
+  BlogPostContent,
+  BlogPostHeader,
+  BlogPostSidebar,
+  BlogPostBackButton,
+} from "@/components/blog/BlogPostContent";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import rehypeSlug from "rehype-slug";
 import rehypeKatex from "rehype-katex";
@@ -28,47 +34,40 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
     <div className="max-w-6xl mx-auto px-4 lg:px-8 pb-20">
       <div className="lg:grid lg:grid-cols-4 lg:gap-12">
         {/* 左侧 TOC (仅在 lg 及以上屏幕显示) */}
-        <aside className="hidden lg:block col-span-1 py-8">
+        <BlogPostSidebar>
           <TableOfContents headings={headings} />
-        </aside>
+        </BlogPostSidebar>
 
         {/* 右侧主内容区 */}
         <main className="lg:col-span-3 py-8">
           {/* 返回按钮 */}
-          <Link href="/blog" className="inline-block mb-8">
-            <GlassButton variant="secondary" size="sm">
-              <ArrowLeft className="w-4 h-4" />
-              返回列表
-            </GlassButton>
-          </Link>
+          <BlogPostBackButton>
+            <Link href="/blog">
+              <GlassButton variant="secondary" size="sm">
+                <ArrowLeft className="w-4 h-4" />
+                返回列表
+              </GlassButton>
+            </Link>
+          </BlogPostBackButton>
 
           {/* 头部信息 */}
-          <div className="mb-10 text-center">
-            <div className="flex items-center justify-center gap-2 text-cyan-300 text-sm mb-4 font-mono">
-              <Calendar className="w-4 h-4" />
-              <span>{meta.date}</span>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
-              {meta.title}
-            </h1>
-            <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-              {meta.description}
-            </p>
-          </div>
+          <BlogPostHeader title={meta.title} description={meta.description} date={meta.date} />
 
           {/* 文章正文容器 */}
           <GlassCard className="p-8 md:p-12" hoverEffect={false}>
-            <article className="prose prose-invert prose-lg max-w-none prose-headings:font-bold prose-a:text-cyan-300 hover:prose-a:text-cyan-200">
-              <MDXRemote
-                source={content}
-                options={{
-                  mdxOptions: {
-                    remarkPlugins: [remarkGfm, remarkMath],
-                    rehypePlugins: [rehypeSlug, rehypeKatex],
-                  },
-                }}
-              />
-            </article>
+            <BlogPostContent>
+              <article className="prose prose-invert prose-lg max-w-none prose-headings:font-bold prose-a:text-cyan-300 hover:prose-a:text-cyan-200">
+                <MDXRemote
+                  source={content}
+                  options={{
+                    mdxOptions: {
+                      remarkPlugins: [remarkGfm, remarkMath],
+                      rehypePlugins: [rehypeSlug, rehypeKatex],
+                    },
+                  }}
+                />
+              </article>
+            </BlogPostContent>
           </GlassCard>
         </main>
       </div>
