@@ -1,5 +1,6 @@
 import { getSortedPostsData } from "@/lib/mdx";
 import BlogListClient from "@/components/blog/BlogListClient";
+import { BlogPageHeader } from "@/components/blog/BlogPageHeader";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -14,17 +15,8 @@ export default function BlogPage() {
 
   return (
     <div className="min-h-screen py-24 px-4 sm:px-8">
-      {/* 页面头部：大标题 */}
-      <div className="max-w-4xl mx-auto text-center mb-16 space-y-4">
-        <h1 className="text-5xl md:text-7xl font-bold bg-clip-text text-transparent bg-linear-to-br from-white via-white/80 to-white/40 tracking-tight pb-2">
-          思维碎片
-        </h1>
-        <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-          这里汇集了我对代码、设计与未来的液态思考。
-          <br className="hidden md:block" />
-          像水一样流动，像玻璃一样透明。
-        </p>
-      </div>
+      {/* 页面头部：大标题（客户端组件，支持过渡动画） */}
+      <BlogPageHeader />
 
       {/* 2. 将数据传递给客户端组件进行渲染和交互 */}
       <BlogListClient posts={allPosts} />

@@ -43,13 +43,17 @@ function extractHeadings(content: string): Heading[] {
   const tree = unified().use(remarkParse).parse(content);
   const headings: Heading[] = [];
 
-  visit(tree, 'heading', (node: HeadingNode) => {
+  visit(tree, 'heading', (node) => {
+    const headingNode = node as HeadingNode;
     // 我们只关心 h2, h3, h4
-    if (node.depth > 1 && node.depth < 5) {
+    if (headingNode.depth > 1 && headingNode.depth < 5) {
       // 从子节点中提取纯文本
-      const text = node.children.map((child) => child.value).join('');
+      const text = headingNode.children
+        .filter((child): child is TextNode => 'value' in child)
+        .map((child) => child.value)
+        .join('');
       headings.push({
-        level: node.depth,
+        level: headingNode.depth,
         text,
         slug: slugger.slug(text),
       });
