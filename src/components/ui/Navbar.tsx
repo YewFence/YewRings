@@ -181,7 +181,10 @@ export const Navbar = () => {
         )}
 
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          // 博客页面特殊处理：/blog 和 /blog/* 都视为激活状态
+          const isActive = item.href === "/blog"
+            ? pathname === "/blog" || pathname.startsWith("/blog/")
+            : pathname === item.href;
           const Icon = item.icon;
 
           return (
