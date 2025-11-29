@@ -1,9 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Home, User, BookOpen, Command } from "lucide-react";
+import { Home, User, BookOpen, Command, ArrowLeft } from "lucide-react";
 import { clsx } from "clsx";
 
 const navItems = [
@@ -14,6 +15,28 @@ const navItems = [
 
 export const Navbar = () => {
   const pathname = usePathname();
+  const [showBackButton, setShowBackButton] = useState(false);
+
+  // 判断是否在文章详情页
+  const isArticlePage = pathname.startsWith("/blog/") && pathname !== "/blog";
+
+  // 监听滚动
+  useEffect(() => {
+    if (!isArticlePage) {
+      setShowBackButton(false);
+      return;
+    }
+
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setShowBackButton(scrollY > 150);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // 初始检查
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isArticlePage]);
 
   return (
     <div className="fixed top-6 inset-x-0 z-50 flex justify-center pointer-events-none">
@@ -21,6 +44,7 @@ export const Navbar = () => {
          不会遮挡两边的点击区域
       */}
       <motion.nav
+        layout
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
@@ -28,6 +52,28 @@ export const Navbar = () => {
       >
         {/* 新增：顶部高光元素 */}
         <div className="absolute left-0 top-0 h-px w-full bg-linear-to-r from-transparent via-white/30 to-transparent" />
+
+        {/* 返回按钮 - 滚动时融入导航栏 */}
+        {isArticlePage && (
+          <motion.div
+            initial={{ width: 0, opacity: 0 }}
+            animate={
+              showBackButton
+                ? { width: "auto", opacity: 1 }
+                : { width: 0, opacity: 0 }
+            }
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="flex items-center overflow-hidden"
+          >
+            <Link
+              href="/blog"
+              className="p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </Link>
+            <div className="w-px h-4 bg-white/10 mx-1" />
+          </motion.div>
+        )}
 
         {navItems.map((item) => {
           const isActive = pathname === item.href;
