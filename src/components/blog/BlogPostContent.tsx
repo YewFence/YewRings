@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useTransitionSafe } from "@/contexts/TransitionContext";
+import { Calendar, User } from "lucide-react";
 
 interface BlogPostContentProps {
   children: React.ReactNode;
@@ -38,9 +39,10 @@ interface BlogPostHeaderProps {
   title: string;
   description: string;
   date: string;
+  author?: string;
 }
 
-export function BlogPostHeader({ title, description, date }: BlogPostHeaderProps) {
+export function BlogPostHeader({ title, description, date, author }: BlogPostHeaderProps) {
   const transition = useTransitionSafe();
   const isHidden =
     transition?.phase === "navigating" || transition?.phase === "animating-in";
@@ -61,11 +63,20 @@ export function BlogPostHeader({ title, description, date }: BlogPostHeaderProps
       }}
       className="mb-10 text-center"
     >
-      <div className="flex items-center justify-center gap-2 text-cyan-300 text-sm mb-4 font-mono">
-        <span>{date}</span>
-      </div>
       <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">{title}</h1>
-      <p className="text-xl text-slate-400 max-w-2xl mx-auto">{description}</p>
+      <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-4">{description}</p>
+      <div className="flex items-center justify-center gap-4 text-cyan-300 text-sm font-mono">
+        {author && (
+          <span className="flex items-center gap-1.5">
+            <User className="w-4 h-4" />
+            {author}
+          </span>
+        )}
+        <span className="flex items-center gap-1.5">
+          <Calendar className="w-4 h-4" />
+          {date}
+        </span>
+      </div>
     </motion.div>
   );
 }
