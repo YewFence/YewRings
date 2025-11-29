@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -16,9 +16,55 @@ const navItems = [
 export const Navbar = () => {
   const pathname = usePathname();
   const [showBackButton, setShowBackButton] = useState(false);
+  const prevPathnameRef = useRef(pathname);
+  const [skipAnimation, setSkipAnimation] = useState(false);
+  const [articleTitle, setArticleTitle] = useState<string | null>(null);
 
   // 判断是否在文章详情页
   const isArticlePage = pathname.startsWith("/blog/") && pathname !== "/blog";
+
+  // 从 DOM 获取文章标题
+  useEffect(() => {
+    if (!isArticlePage) {
+      setArticleTitle(null);
+      return;
+    }
+
+    // 尝试立即获取
+    const h1 = document.querySelector("h1");
+    if (h1) {
+      setArticleTitle(h1.textContent);
+      return;
+    }
+
+    // 如果还没有 h1，用 MutationObserver 监听 DOM 变化
+    const observer = new MutationObserver(() => {
+      const h1 = document.querySelector("h1");
+      if (h1) {
+        setArticleTitle(h1.textContent);
+        observer.disconnect();
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => observer.disconnect();
+  }, [isArticlePage, pathname]);
+
+  // 检测路由变化，跳过动画
+  useEffect(() => {
+    if (prevPathnameRef.current !== pathname) {
+      setSkipAnimation(true);
+      prevPathnameRef.current = pathname;
+      // 下一帧恢复动画
+      requestAnimationFrame(() => {
+        setSkipAnimation(false);
+      });
+    }
+  }, [pathname]);
 
   // 监听滚动
   useEffect(() => {
@@ -88,7 +134,7 @@ export const Navbar = () => {
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}
-              
+
               <span className={clsx(
                 "relative z-10 flex items-center gap-2 text-sm font-medium transition-colors",
                 isActive ? "text-white" : "text-slate-400 group-hover:text-slate-200"
@@ -99,6 +145,27 @@ export const Navbar = () => {
             </Link>
           );
         })}
+
+        {/* 文章标题 - 仅在文章页面显示 */}
+        <motion.div
+          initial={false}
+          animate={
+            showBackButton && articleTitle
+              ? { width: "auto", opacity: 1 }
+              : { width: 0, opacity: 0 }
+          }
+          transition={
+            skipAnimation
+              ? { duration: 0 }
+              : { type: "spring", stiffness: 300, damping: 20 }
+          }
+          className="flex items-center overflow-hidden"
+        >
+          <div className="w-px h-4 bg-white/10 mx-1" />
+          <span className="text-sm text-slate-300 whitespace-nowrap px-2 max-w-48 truncate">
+            {articleTitle}
+          </span>
+        </motion.div>
 
         {/* 一个装饰性的分割线和功能按钮 */}
         <div className="w-px h-4 bg-white/10 mx-2" />
