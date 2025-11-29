@@ -59,8 +59,15 @@ const getParentHeadings = (
 
 export const TableOfContents = ({ headings }: TOCProps) => {
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
-  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  // 默认折叠所有顶级标题
+  const [collapsed, setCollapsed] = useState<Set<string>>(() => {
+    return new Set(headings.filter(h => h.level === 2).map(h => h.slug));
+  });
   const isScrollingRef = useRef(false);
+  const tocRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<Map<string, HTMLElement>>(new Map());
+  const [showTopMask, setShowTopMask] = useState(false);
+  const [showBottomMask, setShowBottomMask] = useState(false);
 
   // 更新折叠状态的函数
   const updateCollapsed = (slug: string) => {
@@ -82,6 +89,71 @@ export const TableOfContents = ({ headings }: TOCProps) => {
       return newSet;
     });
   };
+
+  // 滚动 TOC 容器使活动项可见
+  const scrollTocToActiveItem = (slug: string) => {
+    const tocContainer = tocRef.current;
+    const activeItem = itemRefs.current.get(slug);
+    if (!tocContainer || !activeItem) return;
+
+    const containerRect = tocContainer.getBoundingClientRect();
+    const itemRect = activeItem.getBoundingClientRect();
+
+    // 计算项目相对于容器的位置
+    const itemTop = itemRect.top - containerRect.top + tocContainer.scrollTop;
+    const itemBottom = itemTop + itemRect.height;
+
+    // 检查项目是否在可视区域内（留一点边距）
+    const padding = 40;
+    const visibleTop = tocContainer.scrollTop + padding;
+    const visibleBottom = tocContainer.scrollTop + tocContainer.clientHeight - padding;
+
+    if (itemTop < visibleTop) {
+      // 项目在上方，滚动到使其可见
+      tocContainer.scrollTo({
+        top: itemTop - padding,
+        behavior: 'smooth',
+      });
+    } else if (itemBottom > visibleBottom) {
+      // 项目在下方，滚动到使其可见
+      tocContainer.scrollTo({
+        top: itemBottom - tocContainer.clientHeight + padding,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  // 监听 TOC 容器滚动，更新遮罩显示状态
+  const updateScrollMasks = () => {
+    const el = tocRef.current;
+    if (!el) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    const isScrollable = scrollHeight > clientHeight;
+
+    setShowTopMask(isScrollable && scrollTop > 10);
+    setShowBottomMask(isScrollable && scrollTop < scrollHeight - clientHeight - 10);
+  };
+
+  useEffect(() => {
+    updateScrollMasks();
+    const el = tocRef.current;
+    if (el) {
+      el.addEventListener('scroll', updateScrollMasks, { passive: true });
+      return () => el.removeEventListener('scroll', updateScrollMasks);
+    }
+  }, [collapsed]); // 折叠状态变化时重新计算
+
+  // 当活动标题变化时，滚动 TOC 使其可见
+  useEffect(() => {
+    if (activeSlug) {
+      // 延迟一点执行，确保折叠动画完成后再滚动
+      const timer = setTimeout(() => {
+        scrollTocToActiveItem(activeSlug);
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [activeSlug]);
 
   useEffect(() => {
     const updateActiveHeading = () => {
@@ -221,7 +293,14 @@ export const TableOfContents = ({ headings }: TOCProps) => {
 
     return (
       <li key={heading.slug}>
-        <div className="flex items-center group">
+        <div
+          ref={(el) => {
+            if (el) {
+              itemRefs.current.set(heading.slug, el);
+            }
+          }}
+          className="flex items-center group"
+        >
           {/* 折叠按钮 */}
           {childHeadings.length > 0 && (
             <button
@@ -281,17 +360,51 @@ export const TableOfContents = ({ headings }: TOCProps) => {
 
   // 获取顶级标题（level 2）
   const topLevelHeadings = headings.filter((h) => h.level === 2);
-  
-  return (
-    <nav className="sticky top-24 max-h-[calc(100vh-6rem)] overflow-y-auto p-3 rounded-2xl bg-black/20 border border-white/10 backdrop-blur-lg shadow-lg shadow-black/20">
-      {/* 顶部高光 */}
-      <div className="absolute left-0 top-0 h-px w-full bg-linear-to-r from-transparent via-white/30 to-transparent" />
 
-      <ul className="space-y-1">
-        {topLevelHeadings.map((heading) =>
-          renderHeadingItem(heading, headings.findIndex(h => h.slug === heading.slug))
-        )}
-      </ul>
+  return (
+    <nav className="sticky top-24">
+      {/* 外层容器：圆角边框和背景 */}
+      <div className="rounded-2xl bg-black/20 border border-white/10 backdrop-blur-lg shadow-lg shadow-black/20 overflow-hidden">
+        {/* 顶部高光 */}
+        <div className="absolute left-0 top-0 h-px w-full bg-linear-to-r from-transparent via-white/30 to-transparent z-10" />
+
+        {/* 顶部渐变遮罩 */}
+        <div
+          className={clsx(
+            'absolute top-0 left-0 right-0 h-8 bg-linear-to-b from-white/20 to-transparent pointer-events-none z-10 transition-opacity duration-300 rounded-t-2xl',
+            showTopMask ? 'opacity-100' : 'opacity-0'
+          )}
+        />
+
+        {/* 可滚动内容区域 */}
+        <div
+          ref={tocRef}
+          className="max-h-[calc(100vh-8rem)] overflow-y-auto p-3"
+          style={{
+            scrollbarWidth: 'none', // Firefox
+            msOverflowStyle: 'none', // IE/Edge
+          }}
+        >
+          <style jsx>{`
+            div::-webkit-scrollbar {
+              display: none;
+            }
+          `}</style>
+          <ul className="space-y-1">
+            {topLevelHeadings.map((heading) =>
+              renderHeadingItem(heading, headings.findIndex(h => h.slug === heading.slug))
+            )}
+          </ul>
+        </div>
+
+        {/* 底部渐变遮罩 */}
+        <div
+          className={clsx(
+            'absolute bottom-0 left-0 right-0 h-8 bg-linear-to-t from-white/20 to-transparent pointer-events-none z-10 transition-opacity duration-300 rounded-b-2xl',
+            showBottomMask ? 'opacity-100' : 'opacity-0'
+          )}
+        />
+      </div>
     </nav>
   );
 };
