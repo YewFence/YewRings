@@ -319,7 +319,7 @@ export const TableOfContents = ({ headings }: TOCProps) => {
         {/* 顶部渐变遮罩 */}
         <div
           className={clsx(
-            'absolute top-0 left-0 right-0 h-8 bg-linear-to-b from-black/40 to-transparent pointer-events-none z-10 transition-opacity duration-300 rounded-t-2xl',
+            'absolute top-0 left-0 right-0 h-8 bg-linear-to-b from-white/20 to-transparent pointer-events-none z-10 transition-opacity duration-300 rounded-t-2xl',
             showTopMask ? 'opacity-100' : 'opacity-0'
           )}
         />
@@ -348,7 +348,7 @@ export const TableOfContents = ({ headings }: TOCProps) => {
         {/* 底部渐变遮罩 */}
         <div
           className={clsx(
-            'absolute bottom-0 left-0 right-0 h-8 bg-linear-to-t from-black/40 to-transparent pointer-events-none z-10 transition-opacity duration-300 rounded-b-2xl',
+            'absolute bottom-0 left-0 right-0 h-8 bg-linear-to-t from-white/20 to-transparent pointer-events-none z-10 transition-opacity duration-300 rounded-b-2xl',
             showBottomMask ? 'opacity-100' : 'opacity-0'
           )}
         />
