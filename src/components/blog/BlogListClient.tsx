@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Search, Calendar, ArrowRight, Sparkles } from "lucide-react";
 import { GlassCard } from "@/components/ui/GlassCard";
+import { ClonedCard } from "@/components/blog/ClonedCard";
 import { useTransition } from "@/contexts/TransitionContext";
 import type { PostMeta } from "@/lib/mdx";
 
@@ -33,9 +34,17 @@ const itemVariants = {
   exit: { opacity: 0, y: -20, transition: { duration: 0.2 } },
 } as const;
 
+// 克隆卡片的信息类型
+interface ClonedCard {
+  slug: string;
+  post: PostMeta;
+  rect: DOMRect;
+}
+
 export default function BlogListClient({ posts }: { posts: PostMeta[] }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [clickedSlug, setClickedSlug] = useState<string | null>(null);
+  const [clonedCard, setClonedCard] = useState<ClonedCard | null>(null);
   const { isTransitioning, phase, targetSlug, startTransition, setPhase } = useTransition();
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const router = useRouter();
@@ -72,6 +81,8 @@ export default function BlogListClient({ posts }: { posts: PostMeta[] }) {
 
       const rect = cardElement.getBoundingClientRect();
       setClickedSlug(slug);
+      // 立即创建克隆卡片覆盖在原位置
+      setClonedCard({ slug, post, rect });
       startTransition(rect, post, slug);
     },
     [isTransitioning, startTransition]
@@ -88,6 +99,15 @@ export default function BlogListClient({ posts }: { posts: PostMeta[] }) {
 
   return (
     <div className="w-full max-w-5xl mx-auto">
+      {/* 克隆卡片（脱离动画容器，不会被淡出） */}
+      {clonedCard && (
+        <ClonedCard
+          post={clonedCard.post}
+          rect={clonedCard.rect}
+          isAnimating={phase === "preparing" || phase === "navigating"}
+        />
+      )}
+
       {/* 搜索栏区域 */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
