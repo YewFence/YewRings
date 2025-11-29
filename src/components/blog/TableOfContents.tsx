@@ -65,6 +65,7 @@ export const TableOfContents = ({ headings }: TOCProps) => {
   });
   const isScrollingRef = useRef(false);
   const tocRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<Map<string, HTMLElement>>(new Map());
   const [showTopMask, setShowTopMask] = useState(false);
   const [showBottomMask, setShowBottomMask] = useState(false);
 
@@ -89,6 +90,39 @@ export const TableOfContents = ({ headings }: TOCProps) => {
     });
   };
 
+  // 滚动 TOC 容器使活动项可见
+  const scrollTocToActiveItem = (slug: string) => {
+    const tocContainer = tocRef.current;
+    const activeItem = itemRefs.current.get(slug);
+    if (!tocContainer || !activeItem) return;
+
+    const containerRect = tocContainer.getBoundingClientRect();
+    const itemRect = activeItem.getBoundingClientRect();
+
+    // 计算项目相对于容器的位置
+    const itemTop = itemRect.top - containerRect.top + tocContainer.scrollTop;
+    const itemBottom = itemTop + itemRect.height;
+
+    // 检查项目是否在可视区域内（留一点边距）
+    const padding = 40;
+    const visibleTop = tocContainer.scrollTop + padding;
+    const visibleBottom = tocContainer.scrollTop + tocContainer.clientHeight - padding;
+
+    if (itemTop < visibleTop) {
+      // 项目在上方，滚动到使其可见
+      tocContainer.scrollTo({
+        top: itemTop - padding,
+        behavior: 'smooth',
+      });
+    } else if (itemBottom > visibleBottom) {
+      // 项目在下方，滚动到使其可见
+      tocContainer.scrollTo({
+        top: itemBottom - tocContainer.clientHeight + padding,
+        behavior: 'smooth',
+      });
+    }
+  };
+
   // 监听 TOC 容器滚动，更新遮罩显示状态
   const updateScrollMasks = () => {
     const el = tocRef.current;
@@ -109,6 +143,17 @@ export const TableOfContents = ({ headings }: TOCProps) => {
       return () => el.removeEventListener('scroll', updateScrollMasks);
     }
   }, [collapsed]); // 折叠状态变化时重新计算
+
+  // 当活动标题变化时，滚动 TOC 使其可见
+  useEffect(() => {
+    if (activeSlug) {
+      // 延迟一点执行，确保折叠动画完成后再滚动
+      const timer = setTimeout(() => {
+        scrollTocToActiveItem(activeSlug);
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [activeSlug]);
 
   useEffect(() => {
     const updateActiveHeading = () => {
@@ -248,7 +293,14 @@ export const TableOfContents = ({ headings }: TOCProps) => {
 
     return (
       <li key={heading.slug}>
-        <div className="flex items-center group">
+        <div
+          ref={(el) => {
+            if (el) {
+              itemRefs.current.set(heading.slug, el);
+            }
+          }}
+          className="flex items-center group"
+        >
           {/* 折叠按钮 */}
           {childHeadings.length > 0 && (
             <button
