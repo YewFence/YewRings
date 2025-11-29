@@ -17,6 +17,7 @@ import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import "katex/dist/katex.min.css";
+import type { Metadata } from "next";
 
 // 预生成静态路径 (SSG) - 对SEO非常重要
 export async function generateStaticParams() {
@@ -24,6 +25,30 @@ export async function generateStaticParams() {
   return posts.map((post) => ({
     slug: post.slug,
   }));
+}
+
+// 动态生成页面元数据（标题、描述等）
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const { meta } = getPostData(slug);
+
+  return {
+    title: meta.title,
+    description: meta.description,
+    authors: meta.author ? [{ name: meta.author }] : undefined,
+    openGraph: {
+      title: meta.title,
+      description: meta.description,
+      type: "article",
+      publishedTime: meta.date,
+      authors: meta.author ? [meta.author] : undefined,
+    },
+    twitter: {
+      card: "summary",
+      title: meta.title,
+      description: meta.description,
+    },
+  };
 }
 
 export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
