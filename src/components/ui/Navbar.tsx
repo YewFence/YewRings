@@ -14,7 +14,7 @@ const navItems = [
 ];
 
 // 最小边距阈值（两侧各保留的最小空间）
-const MIN_MARGIN = 24;
+const MIN_MARGIN = 70;
 
 export const Navbar = () => {
   const pathname = usePathname();
@@ -24,6 +24,9 @@ export const Navbar = () => {
   const [articleTitle, setArticleTitle] = useState<string | null>(null);
   const [titleMaxWidth, setTitleMaxWidth] = useState<number>(200);
   const navRef = useRef<HTMLElement>(null);
+  const navBaseWidthRef = useRef<number | null>(null); // 记录导航栏基础宽度（不含标题）
+  const titleRef = useRef<HTMLSpanElement>(null);
+  const [titleWidth, setTitleWidth] = useState<number | null>(null); // 标题实际渲染宽度
 
   // 判断是否在文章详情页
   const isArticlePage = pathname.startsWith("/blog/") && pathname !== "/blog";
@@ -66,11 +69,17 @@ export const Navbar = () => {
       if (!navRef.current) return;
 
       const viewportWidth = window.innerWidth;
-      const navRect = navRef.current.getBoundingClientRect();
-      const navWidthWithoutTitle = navRect.width - titleMaxWidth;
 
-      // 可用空间 = 视窗宽度 - 导航栏其他部分宽度 - 两侧最小边距
-      const availableWidth = viewportWidth - navWidthWithoutTitle - MIN_MARGIN * 2;
+      // 只在标题未显示时测量并记录基础宽度，避免动画期间的循环依赖
+      if (!shouldShow && navBaseWidthRef.current === null) {
+        navBaseWidthRef.current = navRef.current.getBoundingClientRect().width;
+      }
+
+      // 使用记录的基础宽度，如果没有则用当前宽度
+      const baseWidth = navBaseWidthRef.current ?? navRef.current.getBoundingClientRect().width;
+
+      // 可用空间 = 视窗宽度 - 导航栏基础宽度 - 两侧最小边距
+      const availableWidth = viewportWidth - baseWidth - MIN_MARGIN * 2;
 
       // 限制最大宽度，最小为 0
       setTitleMaxWidth(Math.max(0, availableWidth));
@@ -80,6 +89,29 @@ export const Navbar = () => {
     window.addEventListener("resize", calculateMaxWidth);
     return () => window.removeEventListener("resize", calculateMaxWidth);
   }, [shouldShow, articleTitle]);
+
+  // 测量标题渲染后的实际宽度并锁定，防止 spring 回弹时被压缩
+  useEffect(() => {
+    if (!titleRef.current || !articleTitle || titleWidth !== null) return;
+
+    // 等待一帧让 DOM 渲染完成
+    const id = requestAnimationFrame(() => {
+      if (titleRef.current) {
+        // 取 scrollWidth（完整内容宽度）和 clientWidth（受 maxWidth 限制后的宽度）中的较小值
+        const actualWidth = Math.min(
+          titleRef.current.scrollWidth,
+          titleMaxWidth
+        );
+        setTitleWidth(actualWidth);
+      }
+    });
+    return () => cancelAnimationFrame(id);
+  }, [articleTitle, titleMaxWidth, titleWidth]);
+
+  // 当标题或路由变化时，重置宽度让它重新测量
+  useEffect(() => {
+    setTitleWidth(null);
+  }, [articleTitle, pathname]);
 
   // 检测路由变化，跳过动画
   useEffect(() => {
@@ -184,14 +216,19 @@ export const Navbar = () => {
           transition={
             skipAnimation
               ? { duration: 0 }
-              : { type: "spring", stiffness: 300, damping: 20 }
+              : { type: "spring", stiffness: 300, damping: 25 }
           }
           className="flex items-center overflow-hidden"
         >
-          <div className="w-px h-4 bg-white/10 mx-1" />
+          <div className="w-px h-4 bg-white/10 mx-1 shrink-0" />
           <span
-            className="text-sm text-slate-300 whitespace-nowrap px-2 truncate"
-            style={{ maxWidth: titleMaxWidth }}
+            ref={titleRef}
+            className="text-sm text-slate-300 whitespace-nowrap px-2 truncate shrink-0"
+            style={{
+              // 使用固定宽度而非 maxWidth，防止 spring 回弹时被压缩
+              width: titleWidth ?? undefined,
+              maxWidth: titleWidth === null ? titleMaxWidth : undefined,
+            }}
           >
             {articleTitle}
           </span>
