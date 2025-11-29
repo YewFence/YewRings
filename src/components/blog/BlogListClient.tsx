@@ -3,9 +3,8 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Search, Calendar, ArrowRight, Sparkles } from "lucide-react";
-import { GlassCard } from "@/components/ui/GlassCard";
-import { ClonedCard } from "@/components/blog/ClonedCard";
+import { Search } from "lucide-react";
+import { ClonedCard, BlogCardContent } from "@/components/blog/ClonedCard";
 import { useTransition } from "@/contexts/TransitionContext";
 import type { PostMeta } from "@/lib/mdx";
 
@@ -35,7 +34,7 @@ const itemVariants = {
 } as const;
 
 // 克隆卡片的信息类型
-interface ClonedCard {
+interface ClonedCardData {
   slug: string;
   post: PostMeta;
   rect: DOMRect;
@@ -43,8 +42,7 @@ interface ClonedCard {
 
 export default function BlogListClient({ posts }: { posts: PostMeta[] }) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [clickedSlug, setClickedSlug] = useState<string | null>(null);
-  const [clonedCard, setClonedCard] = useState<ClonedCard | null>(null);
+  const [clonedCard, setClonedCard] = useState<ClonedCardData | null>(null);
   const { isTransitioning, phase, targetSlug, startTransition, setPhase } = useTransition();
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const router = useRouter();
@@ -80,7 +78,6 @@ export default function BlogListClient({ posts }: { posts: PostMeta[] }) {
       if (!cardElement) return;
 
       const rect = cardElement.getBoundingClientRect();
-      setClickedSlug(slug);
       // 立即创建克隆卡片覆盖在原位置
       setClonedCard({ slug, post, rect });
       startTransition(rect, post, slug);
@@ -137,63 +134,22 @@ export default function BlogListClient({ posts }: { posts: PostMeta[] }) {
         className="grid grid-cols-1 md:grid-cols-2 gap-6"
       >
         {filteredPosts.length > 0 ? (
-          filteredPosts.map((post) => {
-            const isClicked = clickedSlug === post.slug;
-            const isPreparing = phase === "preparing" || phase === "navigating";
-
-            return (
-              <motion.div
-                key={post.slug}
-                variants={itemVariants}
-                // 被点击的卡片不参与容器的淡出动画
-                animate={isClicked && isPreparing ? { opacity: 1, y: 0 } : undefined}
+          filteredPosts.map((post) => (
+            <motion.div
+              key={post.slug}
+              variants={itemVariants}
+            >
+              <div
+                onClick={() => handleCardClick(post, post.slug)}
+                className="cursor-pointer"
               >
-                <div
-                  onClick={() => handleCardClick(post, post.slug)}
-                  className="cursor-pointer"
-                >
-                  <GlassCard
-                    ref={(el) => setCardRef(post.slug, el)}
-                    className="h-full p-8 group flex flex-col justify-between hover:shadow-cyan-900/20"
-                    disableInitialAnimation
-                  >
-                    {/* 卡片内容：被点击时模糊（不淡出，保持自然） */}
-                    <motion.div
-                      animate={{
-                        filter: isClicked && isPreparing ? "blur(12px)" : "blur(0px)",
-                      }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <div>
-                        {/* 顶部元数据 */}
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-2 text-xs font-mono text-cyan-300 bg-cyan-950/30 px-2 py-1 rounded-md border border-cyan-500/20">
-                            <Calendar className="w-3 h-3" />
-                            {post.date}
-                          </div>
-                          <Sparkles className="w-4 h-4 text-slate-600 group-hover:text-yellow-200 transition-colors opacity-0 group-hover:opacity-100" />
-                        </div>
-
-                        {/* 标题与描述 */}
-                        <h2 className="text-2xl font-bold text-slate-100 mb-3 group-hover:text-white transition-colors">
-                          {post.title}
-                        </h2>
-                        <p className="text-slate-400 text-sm leading-relaxed line-clamp-3">
-                          {post.description}
-                        </p>
-                      </div>
-
-                      {/* 底部链接 */}
-                      <div className="mt-8 flex items-center text-sm font-medium text-cyan-400 group-hover:text-cyan-300">
-                        阅读文章
-                        <ArrowRight className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform" />
-                      </div>
-                    </motion.div>
-                  </GlassCard>
-                </div>
-              </motion.div>
-            );
-          })
+                <BlogCardContent
+                  ref={(el) => setCardRef(post.slug, el)}
+                  post={post}
+                />
+              </div>
+            </motion.div>
+          ))
         ) : (
           /* 空状态 */
           <motion.div variants={itemVariants} className="col-span-full text-center py-20">
