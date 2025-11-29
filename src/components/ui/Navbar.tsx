@@ -13,15 +13,21 @@ const navItems = [
   { name: "关于", href: "/about", icon: User },
 ];
 
+// 最小边距阈值（两侧各保留的最小空间）
+const MIN_MARGIN = 24;
+
 export const Navbar = () => {
   const pathname = usePathname();
   const [showBackButton, setShowBackButton] = useState(false);
   const prevPathnameRef = useRef(pathname);
   const [skipAnimation, setSkipAnimation] = useState(false);
   const [articleTitle, setArticleTitle] = useState<string | null>(null);
+  const [titleMaxWidth, setTitleMaxWidth] = useState<number>(200);
+  const navRef = useRef<HTMLElement>(null);
 
   // 判断是否在文章详情页
   const isArticlePage = pathname.startsWith("/blog/") && pathname !== "/blog";
+  const shouldShow = isArticlePage && showBackButton;
 
   // 从 DOM 获取文章标题
   useEffect(() => {
@@ -53,6 +59,27 @@ export const Navbar = () => {
 
     return () => observer.disconnect();
   }, [isArticlePage, pathname]);
+
+  // 计算标题最大宽度
+  useEffect(() => {
+    const calculateMaxWidth = () => {
+      if (!navRef.current) return;
+
+      const viewportWidth = window.innerWidth;
+      const navRect = navRef.current.getBoundingClientRect();
+      const navWidthWithoutTitle = navRect.width - titleMaxWidth;
+
+      // 可用空间 = 视窗宽度 - 导航栏其他部分宽度 - 两侧最小边距
+      const availableWidth = viewportWidth - navWidthWithoutTitle - MIN_MARGIN * 2;
+
+      // 限制最大宽度，最小为 0
+      setTitleMaxWidth(Math.max(0, availableWidth));
+    };
+
+    calculateMaxWidth();
+    window.addEventListener("resize", calculateMaxWidth);
+    return () => window.removeEventListener("resize", calculateMaxWidth);
+  }, [shouldShow, articleTitle]);
 
   // 检测路由变化，跳过动画
   useEffect(() => {
@@ -162,7 +189,10 @@ export const Navbar = () => {
           className="flex items-center overflow-hidden"
         >
           <div className="w-px h-4 bg-white/10 mx-1" />
-          <span className="text-sm text-slate-300 whitespace-nowrap px-2 max-w-48 truncate">
+          <span
+            className="text-sm text-slate-300 whitespace-nowrap px-2 truncate"
+            style={{ maxWidth: titleMaxWidth }}
+          >
             {articleTitle}
           </span>
         </motion.div>
