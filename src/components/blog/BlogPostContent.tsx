@@ -9,22 +9,23 @@ interface BlogPostContentProps {
 
 export function BlogPostContent({ children }: BlogPostContentProps) {
   const transition = useTransitionSafe();
-  const isFromTransition = transition?.phase === "animating-in" || transition?.phase === "navigating";
+  // 在过渡期间（navigating/animating-in）隐藏内容，settling 阶段开始显示
+  const isHidden =
+    transition?.phase === "navigating" || transition?.phase === "animating-in";
+  const isSettling = transition?.phase === "settling";
 
   return (
     <motion.div
       initial={{
-        filter: isFromTransition ? "blur(12px)" : "blur(0px)",
-        opacity: isFromTransition ? 0.6 : 1,
+        opacity: isHidden ? 0 : 1,
       }}
       animate={{
-        filter: "blur(0px)",
-        opacity: 1,
+        opacity: isHidden ? 0 : 1,
       }}
       transition={{
-        duration: 0.6,
+        duration: 0.4,
         ease: "easeOut",
-        delay: isFromTransition ? 0.25 : 0,
+        delay: isSettling ? 0.1 : 0,
       }}
     >
       {children}
@@ -41,20 +42,22 @@ interface BlogPostHeaderProps {
 
 export function BlogPostHeader({ title, description, date }: BlogPostHeaderProps) {
   const transition = useTransitionSafe();
-  const isFromTransition = transition?.phase === "animating-in" || transition?.phase === "navigating";
+  const isHidden =
+    transition?.phase === "navigating" || transition?.phase === "animating-in";
+  const isSettling = transition?.phase === "settling";
 
   return (
     <motion.div
       initial={{
-        opacity: isFromTransition ? 0 : 1,
+        opacity: isHidden ? 0 : 1,
       }}
       animate={{
-        opacity: 1,
+        opacity: isHidden ? 0 : 1,
       }}
       transition={{
-        duration: 0.5,
+        duration: 0.4,
         ease: "easeOut",
-        delay: isFromTransition ? 0.2 : 0,
+        delay: isSettling ? 0.15 : 0,
       }}
       className="mb-10 text-center"
     >
@@ -74,20 +77,22 @@ interface BlogPostSidebarProps {
 
 export function BlogPostSidebar({ children }: BlogPostSidebarProps) {
   const transition = useTransitionSafe();
-  const isFromTransition = transition?.phase === "animating-in" || transition?.phase === "navigating";
+  const isHidden =
+    transition?.phase === "navigating" || transition?.phase === "animating-in";
+  const isSettling = transition?.phase === "settling";
 
   return (
     <motion.aside
       initial={{
-        opacity: isFromTransition ? 0 : 1,
+        opacity: isHidden ? 0 : 1,
       }}
       animate={{
-        opacity: 1,
+        opacity: isHidden ? 0 : 1,
       }}
       transition={{
-        duration: 0.5,
+        duration: 0.4,
         ease: "easeOut",
-        delay: isFromTransition ? 0.3 : 0,
+        delay: isSettling ? 0.2 : 0,
       }}
       className="hidden lg:block col-span-1 py-8"
     >
@@ -103,20 +108,22 @@ interface BlogPostBackButtonProps {
 
 export function BlogPostBackButton({ children }: BlogPostBackButtonProps) {
   const transition = useTransitionSafe();
-  const isFromTransition = transition?.phase === "animating-in" || transition?.phase === "navigating";
+  const isHidden =
+    transition?.phase === "navigating" || transition?.phase === "animating-in";
+  const isSettling = transition?.phase === "settling";
 
   return (
     <motion.div
       initial={{
-        opacity: isFromTransition ? 0 : 1,
+        opacity: isHidden ? 0 : 1,
       }}
       animate={{
-        opacity: 1,
+        opacity: isHidden ? 0 : 1,
       }}
       transition={{
         duration: 0.4,
         ease: "easeOut",
-        delay: isFromTransition ? 0.15 : 0,
+        delay: isSettling ? 0.1 : 0,
       }}
       className="inline-block mb-8"
     >

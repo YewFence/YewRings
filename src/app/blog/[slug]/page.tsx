@@ -1,6 +1,5 @@
 import { getPostData, getSortedPostsData } from "@/lib/mdx";
 import { MDXRemote } from "next-mdx-remote/rsc";
-import { GlassCard } from "@/components/ui/GlassCard";
 import { GlassButton } from "@/components/ui/GlassButton";
 import { ScrollToTopButton } from "@/components/ui/ScrollToTopButton";
 import { TableOfContents } from "@/components/blog/TableOfContents";
@@ -10,6 +9,7 @@ import {
   BlogPostSidebar,
   BlogPostBackButton,
 } from "@/components/blog/BlogPostContent";
+import { BlogPostGlassCard } from "@/components/blog/BlogPostGlassCard";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import rehypeSlug from "rehype-slug";
@@ -54,7 +54,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           <BlogPostHeader title={meta.title} description={meta.description} date={meta.date} />
 
           {/* 文章正文容器 */}
-          <GlassCard className="p-8 md:p-12" hoverEffect={false}>
+          <BlogPostGlassCard className="p-8 md:p-12">
             <BlogPostContent>
               <article className="prose prose-invert prose-lg max-w-none prose-headings:font-bold prose-a:text-cyan-300 hover:prose-a:text-cyan-200">
                 <MDXRemote
@@ -68,7 +68,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
                 />
               </article>
             </BlogPostContent>
-          </GlassCard>
+          </BlogPostGlassCard>
         </main>
       </div>
 
