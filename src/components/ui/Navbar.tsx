@@ -87,6 +87,7 @@ export const Navbar = () => {
             <Link key={item.href} href={item.href} className="relative px-4 py-2 group">
               {isActive && (
                 <motion.div
+                  style={{originY: '0px'}} 
                   layoutId="activeTab"
                   className="absolute inset-0 bg-white/10 rounded-full"
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
