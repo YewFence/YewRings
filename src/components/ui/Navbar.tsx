@@ -229,7 +229,7 @@ export const Navbar = () => {
               ? { duration: 0 }
               : { type: "spring", stiffness: 300, damping: 25 }
           }
-          className="flex items-center overflow-hidden"
+          className="flex items-center"
         >
           <div className="w-px h-4 bg-white/10 mx-1 shrink-0" />
           <div className="relative px-2 py-1">
