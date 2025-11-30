@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "tests:hide": "node scripts/manage-tests.js hide",
+    "tests:show": "node scripts/manage-tests.js show"
   },
   "dependencies": {
     "@types/unist": "^3.0.3",

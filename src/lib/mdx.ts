@@ -94,7 +94,21 @@ export function getSortedPostsData(): PostMeta[] {
   }
   
   const fileNames = fs.readdirSync(postsDirectory);
-  const allPostsData = fileNames.map((fileName) => {
+  
+  // 过滤文件：
+  // 1. 必须是 .mdx 结尾
+  // 2. 在生产环境中，过滤掉以 'test' 开头的文件
+  const filteredFileNames = fileNames.filter((fileName) => {
+    if (!fileName.endsWith('.mdx')) return false;
+    
+    if (process.env.NODE_ENV === 'production' && fileName.startsWith('test')) {
+      return false;
+    }
+    
+    return true;
+  });
+
+  const allPostsData = filteredFileNames.map((fileName) => {
     const slug = fileName.replace(/\.mdx$/, '');
     const fullPath = path.join(postsDirectory, fileName);
     const fileContents = fs.readFileSync(fullPath, 'utf8');
