@@ -8,12 +8,35 @@ import Slugger from 'github-slugger';
 import type { Node } from 'unist';
 
 const postsDirectory = path.join(process.cwd(), 'content/posts');
+const metaFilePath = path.join(process.cwd(), 'content/meta.json');
+
+type DefaultMeta = {
+  author?: string;
+};
+
+type MetaConfig = {
+  default?: DefaultMeta;
+};
+
+function getDefaultMeta(): DefaultMeta {
+  try {
+    if (fs.existsSync(metaFilePath)) {
+      const content = fs.readFileSync(metaFilePath, 'utf8');
+      const config: MetaConfig = JSON.parse(content);
+      return config.default || {};
+    }
+  } catch {
+    // 忽略读取错误
+  }
+  return {};
+}
 
 export type PostMeta = {
   slug: string;
   title: string;
   date: string;
   description: string;
+  author?: string;
 };
 
 export type Heading = {
@@ -90,12 +113,16 @@ export function getPostData(slug: string) {
   const fullPath = path.join(postsDirectory, `${slug}.mdx`);
   const fileContents = fs.readFileSync(fullPath, 'utf8');
   const { content, data } = matter(fileContents);
+  const defaultMeta = getDefaultMeta();
 
   const headings = extractHeadings(content);
-  
+
+  // 如果文章没有指定 author，则使用默认配置
+  const author = data.author || defaultMeta.author || '';
+
   return {
     content,
-    meta: data as Omit<PostMeta, 'slug'>,
+    meta: { ...data, author } as Omit<PostMeta, 'slug'>,
     headings,
   };
 }
