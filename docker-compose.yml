@@ -1,6 +1,6 @@
 services:
   # 生产环境
-  web:
+  blog:
     build:
       context: .
       dockerfile: Dockerfile
