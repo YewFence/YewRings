@@ -56,7 +56,7 @@ export default function Home() {
         </div>
 
         {/* 滚动提示 */}
-        <ScrollIndicator targetId="latest-posts"></ScrollIndicator>
+        <ScrollIndicator targetId="latest-posts" delay={3000}></ScrollIndicator>
       </div>
 
       {/* 最新文章区域 - 下一页 */}

@@ -8,10 +8,23 @@ interface ScrollIndicatorProps {
   targetId: string;
   children?: React.ReactNode;
   className?: string;
+  delay?: number; // 延迟显示时间（毫秒）
 }
 
-export const ScrollIndicator = ({ targetId, children, className }: ScrollIndicatorProps) => {
-  const [isVisible, setIsVisible] = useState(true);
+export const ScrollIndicator = ({ targetId, children, className, delay = 0 }: ScrollIndicatorProps) => {
+  const [isVisible, setIsVisible] = useState(delay === 0);
+  const [isReady, setIsReady] = useState(delay === 0);
+
+  // 处理延迟显示
+  useEffect(() => {
+    if (delay > 0) {
+      const timer = setTimeout(() => {
+        setIsReady(true);
+        setIsVisible(true);
+      }, delay);
+      return () => clearTimeout(timer);
+    }
+  }, [delay]);
 
   const scrollToContent = () => {
     setIsVisible(false);
