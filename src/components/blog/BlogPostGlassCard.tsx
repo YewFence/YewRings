@@ -13,6 +13,11 @@ export function BlogPostGlassCard({ children, className }: BlogPostGlassCardProp
   const cardRef = useRef<HTMLDivElement>(null);
   const transition = useTransitionSafe();
 
+  // 页面加载时滚动到顶部
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, []);
+
   // 注册目标位置
   useEffect(() => {
     if (cardRef.current && transition?.phase === "navigating") {
