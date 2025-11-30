@@ -1,0 +1,142 @@
+import fs from 'fs';
+import path from 'path';
+import matter from 'gray-matter';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import { visit } from 'unist-util-visit';
+import Slugger from 'github-slugger';
+import type { Node } from 'unist';
+
+const postsDirectory = path.join(process.cwd(), 'content/posts');
+const metaFilePath = path.join(process.cwd(), 'content/meta.json');
+
+type DefaultMeta = {
+  author?: string;
+};
+
+type MetaConfig = {
+  default?: DefaultMeta;
+};
+
+function getDefaultMeta(): DefaultMeta {
+  try {
+    if (fs.existsSync(metaFilePath)) {
+      const content = fs.readFileSync(metaFilePath, 'utf8');
+      const config: MetaConfig = JSON.parse(content);
+      return config.default || {};
+    }
+  } catch {
+    // 忽略读取错误
+  }
+  return {};
+}
+
+export type PostMeta = {
+  slug: string;
+  title: string;
+  date: string;
+  description: string;
+  author?: string;
+};
+
+export type Heading = {
+  level: number;
+  text: string;
+  slug: string;
+};
+
+// 扩展Node类型以包含value属性
+interface TextNode extends Node {
+  value: string;
+}
+
+// 扩展Node类型以包含depth和children属性
+interface HeadingNode extends Node {
+  depth: number;
+  children: TextNode[];
+}
+
+/**
+ * 从 MDX 内容中提取标题
+ * @param content MDX 文件内容
+ * @returns 标题数组
+ */
+function extractHeadings(content: string): Heading[] {
+  const slugger = new Slugger();
+  const tree = unified().use(remarkParse).parse(content);
+  const headings: Heading[] = [];
+
+  visit(tree, 'heading', (node) => {
+    const headingNode = node as HeadingNode;
+    // 我们只关心 h2, h3, h4
+    if (headingNode.depth > 1 && headingNode.depth < 5) {
+      // 从子节点中提取纯文本
+      const text = headingNode.children
+        .filter((child): child is TextNode => 'value' in child)
+        .map((child) => child.value)
+        .join('');
+      headings.push({
+        level: headingNode.depth,
+        text,
+        slug: slugger.slug(text),
+      });
+    }
+  });
+
+  return headings;
+}
+
+
+export function getSortedPostsData(): PostMeta[] {
+  // 如果目录不存在，防止报错
+  if (!fs.existsSync(postsDirectory)) {
+    return [];
+  }
+  
+  const fileNames = fs.readdirSync(postsDirectory);
+  
+  // 过滤文件：
+  // 1. 必须是 .mdx 结尾
+  // 2. 在生产环境中，过滤掉以 'test' 开头的文件
+  const filteredFileNames = fileNames.filter((fileName) => {
+    if (!fileName.endsWith('.mdx')) return false;
+    
+    if (process.env.NODE_ENV === 'production' && fileName.startsWith('test')) {
+      return false;
+    }
+    
+    return true;
+  });
+
+  const allPostsData = filteredFileNames.map((fileName) => {
+    const slug = fileName.replace(/\.mdx$/, '');
+    const fullPath = path.join(postsDirectory, fileName);
+    const fileContents = fs.readFileSync(fullPath, 'utf8');
+    const { data } = matter(fileContents);
+
+    return {
+      slug,
+      ...data,
+    } as PostMeta;
+  });
+
+  return allPostsData.sort((a, b) => (a.date < b.date ? 1 : -1));
+}
+
+export function getPostData(slug: string) {
+  const fullPath = path.join(postsDirectory, `${slug}.mdx`);
+  const fileContents = fs.readFileSync(fullPath, 'utf8');
+  const { content, data } = matter(fileContents);
+  const defaultMeta = getDefaultMeta();
+
+  const headings = extractHeadings(content);
+
+  // 如果文章没有指定 author，则使用默认配置
+  const author = data.author || defaultMeta.author || '';
+
+  return {
+    content,
+    meta: { ...data, author } as Omit<PostMeta, 'slug'>,
+    headings,
+  };
+}
