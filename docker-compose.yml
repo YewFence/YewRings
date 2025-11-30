@@ -1,0 +1,39 @@
+services:
+  # 生产环境
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: yew-rings-blog:latest
+    pull_policy: never
+    container_name: yew-rings-blog
+    restart: unless-stopped
+    # 端口映射请在 docker-compose.override.yml 中配置
+    volumes:
+      - ./content:/app/content:ro
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # 开发环境
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: yew-rings-blog-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+    profiles:
+      - dev

@@ -1,0 +1,28 @@
+# Docker Compose Override 配置示例
+# 复制此文件为 docker-compose.override.yml 并根据需要修改
+# docker-compose.override.yml 会自动与 docker-compose.yml 合并
+
+services:
+  # 生产环境
+  web:
+    # 端口映射 - 根据需要启用
+    # ports:
+    #   - "3000:3000"
+    # 连接到外部 Nginx Docker 反向代理网络（可选）
+    networks:
+      - nginx-proxy-network
+    # 可选：添加额外的环境变量
+    # environment:
+    #   - VIRTUAL_HOST=yourdomain.com
+    #   - LETSENCRYPT_HOST=yourdomain.com
+
+  # 开发环境
+  dev:
+    # 连接到外部 Nginx 反向代理网络（可选）
+    # networks:
+    #   - nginx-proxy-network
+
+# 定义外部 Nginx Docker 网络
+networks:
+  nginx-proxy-network:
+    external: true
