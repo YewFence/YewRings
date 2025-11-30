@@ -25,8 +25,7 @@ export const Navbar = () => {
   const [titleMaxWidth, setTitleMaxWidth] = useState<number>(200);
   const navRef = useRef<HTMLElement>(null);
   const navBaseWidthRef = useRef<number | null>(null); // 记录导航栏基础宽度（不含标题）
-  const titleRef = useRef<HTMLSpanElement>(null);
-  const [titleWidth, setTitleWidth] = useState<number | null>(null); // 标题实际渲染宽度
+  // 仅使用 maxWidth 控制截断，避免固定宽度导致省略失效
 
   // 判断是否在文章详情页
   const isArticlePage = pathname.startsWith("/blog/") && pathname !== "/blog";
@@ -90,29 +89,6 @@ export const Navbar = () => {
     return () => window.removeEventListener("resize", calculateMaxWidth);
   }, [shouldShow, articleTitle]);
 
-  // 测量标题渲染后的实际宽度并锁定，防止 spring 回弹时被压缩
-  useEffect(() => {
-    if (!titleRef.current || !articleTitle || titleWidth !== null) return;
-
-    // 等待一帧让 DOM 渲染完成
-    const id = requestAnimationFrame(() => {
-      if (titleRef.current) {
-        // 取 scrollWidth（完整内容宽度）和 clientWidth（受 maxWidth 限制后的宽度）中的较小值
-        const actualWidth = Math.min(
-          titleRef.current.scrollWidth,
-          titleMaxWidth
-        );
-        setTitleWidth(actualWidth);
-      }
-    });
-    return () => cancelAnimationFrame(id);
-  }, [articleTitle, titleMaxWidth, titleWidth]);
-
-  // 当标题或路由变化时，重置宽度让它重新测量
-  useEffect(() => {
-    setTitleWidth(null);
-  }, [articleTitle, pathname]);
-
   // 检测路由变化，跳过动画
   useEffect(() => {
     if (prevPathnameRef.current !== pathname) {
@@ -158,6 +134,7 @@ export const Navbar = () => {
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
         className="pointer-events-auto relative flex items-center gap-1 p-2 rounded-full border border-white/10 bg-black/25 backdrop-blur-xl shadow-2xl shadow-black/40"
+        ref={navRef}
       >
         {/* 新增：顶部高光元素 */}
         <div className="absolute left-0 top-0 h-px w-full bg-linear-to-r from-transparent via-white/30 to-transparent" />
@@ -229,10 +206,10 @@ export const Navbar = () => {
               ? { duration: 0 }
               : { type: "spring", stiffness: 300, damping: 25 }
           }
-          className="flex items-center"
+          className="flex items-center min-w-0"
         >
           <div className="w-px h-4 bg-white/10 mx-1 shrink-0" />
-          <div className="relative px-2 py-1">
+          <div className="relative px-4 py-2 flex items-center min-w-0">
             {/* 当标题展开时，activeTab 特效移动到这里 */}
             {shouldShow && articleTitle && (
               <motion.div
@@ -243,12 +220,10 @@ export const Navbar = () => {
               />
             )}
             <span
-              ref={titleRef}
-              className="relative z-10 text-sm text-white whitespace-nowrap truncate shrink-0"
+              className="relative z-10 inline-block text-sm text-white whitespace-nowrap truncate shrink-0"
               style={{
-                // 使用固定宽度而非 maxWidth，防止 spring 回弹时被压缩
-                width: titleWidth ?? undefined,
-                maxWidth: titleWidth === null ? titleMaxWidth : undefined,
+                // 使用 maxWidth 控制省略，避免固定 width 破坏省略效果
+                maxWidth: titleMaxWidth,
               }}
             >
               {articleTitle}
