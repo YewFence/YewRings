@@ -1,10 +1,10 @@
 {
   "hero": {
-    "title": "Liquid Blog",
-    "description": "探索数字世界的边界 · iOS 26 概念设计",
+    "title": "YewRings",
+    "description": "记录成长的年轮 · 学习笔记 · 技术分享",
     "techStack": "Next.js 15 · Tailwind CSS · Framer Motion",
     "buttons": {
-      "startReading": "开始阅读",
+      "startReading": "翻阅笔记",
       "github": "GitHub"
     },
     "links": {
@@ -12,15 +12,15 @@
     }
   },
   "latestPosts": {
-    "title": "最新发布",
-    "lastUpdateLabel": "LAST UPDATE",
-    "viewAll": "全部文章",
-    "noPosts": "暂无文章",
+    "title": "最新年轮",
+    "lastUpdateLabel": "LAST RING",
+    "viewAll": "全部笔记",
+    "noPosts": "暂无笔记",
     "moreComing": {
-      "title": "更多内容筹备中",
-      "description": "敬请期待后续更新..."
+      "title": "新的年轮正在生长",
+      "description": "保持学习，持续更新..."
     },
     "readMore": "阅读全文",
-    "postLabel": "Post"
+    "postLabel": "Note"
   }
 }

@@ -1,19 +1,19 @@
 {
-  "title": "About Me",
-  "subtitle": "Digital Creator & Developer",
+  "title": "About YewFence",
+  "subtitle": "Fullstack Learner & Builder",
   "description": [
-    "这里是 Liquid Blog 的控制台，存放着我的思维碎片与技术实验。",
-    "如果你想探索更完整的我——包括我的项目作品、详细经历以及更多维度的数字足迹，请通过下方的传送门前往我的主宇宙。"
+    "这里是 YewFence，在这个博客，我记录着我作为学生的每一个脚印。",
+    "年轮代表着时间的沉淀。我在这里务实地记录学习路径，分享技术心得。如果你对我的成长轨迹感兴趣，欢迎访问我的个人主页。"
   ],
   "buttons": {
     "personalWebsite": "访问个人主页"
   },
   "links": {
-    "personalWebsite": "https://your-personal-website.com"
+    "personalWebsite": "https://yewyard.cn"
   },
   "stats": {
-    "fullstack": "FullStack",
+    "fullstack": "Learning",
     "network": "Network",
-    "creative": "Creative"
+    "creative": "Design"
   }
 }

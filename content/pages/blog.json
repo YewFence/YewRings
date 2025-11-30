@@ -1,20 +1,20 @@
 {
   "metadata": {
-    "title": "博客列表 | Liquid Space",
-    "description": "探索关于前端技术、设计与未来的思考。"
+    "title": "学习笔记 | YewRings",
+    "description": "记录全栈学习的点滴与思考。"
   },
   "header": {
-    "title": "思维碎片",
+    "title": "岁月年轮",
     "description": [
-      "这里汇集了我对代码、设计与未来的液态思考。",
-      "像水一样流动，像玻璃一样透明。"
+      "每一篇文章都是一圈年轮，记录着我在全栈之路上的探索与成长。",
+      "务实前行，积少成多。"
     ]
   },
   "list": {
-    "searchPlaceholder": "搜索灵感...",
-    "emptyState": "没有找到相关的液态想法..."
+    "searchPlaceholder": "搜索学习笔记...",
+    "emptyState": "没有找到相关的年轮记录..."
   },
   "post": {
-    "backToList": "返回列表"
+    "backToList": "返回目录"
   }
 }
