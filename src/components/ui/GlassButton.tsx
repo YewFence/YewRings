@@ -28,8 +28,6 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
 
   return (
     <motion.button
-      whileHover={{ scale: 1.05, y: -2 }}
-      whileTap={{ scale: 0.95 }}
       className={cn(
         "relative group flex items-center justify-center gap-2 overflow-hidden rounded-full font-medium transition-all duration-300",
         // 基础玻璃质感
