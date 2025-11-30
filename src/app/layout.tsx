@@ -3,10 +3,16 @@ import type { Metadata } from "next";
 import { Navbar } from "@/components/ui/Navbar";
 import { TransitionProvider } from "@/contexts/TransitionContext";
 import { PageTransitionOverlay } from "@/components/ui/PageTransitionOverlay";
+import { getMetaContent } from "@/lib/content-loader";
+
+const meta = getMetaContent();
 
 export const metadata: Metadata = {
-  title: "My Liquid Space",
-  description: "A futuristic liquid glass blog",
+  title: {
+    default: meta.site.title,
+    template: `%s | ${meta.site.name}`,
+  },
+  description: meta.site.description,
 };
 
 export default function RootLayout({

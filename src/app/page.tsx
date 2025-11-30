@@ -5,7 +5,12 @@ import { ScrollIndicator } from "@/components/ui/ScrollIndicator";
 import { TechStackSection } from "@/components/home/TechStackSection";
 import { Sparkles, ArrowRight, Github, BookOpen, Terminal } from "lucide-react";
 import { getSortedPostsData } from "@/lib/mdx";
-import { getPageContent } from "@/lib/content-loader";
+import { getPageContent, getPageMetadata } from "@/lib/content-loader";
+import { Metadata } from "next";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return getPageMetadata('home');
+}
 
 export default function Home() {
   // 获取最新的文章

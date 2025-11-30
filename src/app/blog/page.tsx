@@ -2,12 +2,11 @@ import { getSortedPostsData } from "@/lib/mdx";
 import BlogListClient from "@/components/blog/BlogListClient";
 import { BlogPageHeader } from "@/components/blog/BlogPageHeader";
 import { Metadata } from "next";
-import { getPageContent } from "@/lib/content-loader";
+import { getPageContent, getPageMetadata } from "@/lib/content-loader";
 
-export const metadata: Metadata = {
-  title: "博客列表 | Liquid Space",
-  description: "探索关于前端技术、设计与未来的思考。",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return getPageMetadata('blog');
+}
 
 export default function BlogPage() {
   // 1. 在服务端获取数据 (Server Component)
