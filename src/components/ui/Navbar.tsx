@@ -191,11 +191,14 @@ export const Navbar = () => {
             : pathname === item.href;
           const Icon = item.icon;
 
+          // 当标题展开时，博客 tab 的特效应该转移到标题上
+          const showActiveBackground = isActive && !(item.href === "/blog" && shouldShow && articleTitle);
+
           return (
             <Link key={item.href} href={item.href} className="relative px-4 py-2 group">
-              {isActive && (
+              {showActiveBackground && (
                 <motion.div
-                  style={{originY: '0px'}} 
+                  style={{originY: '0px'}}
                   layoutId="activeTab"
                   className="absolute inset-0 bg-white/10 rounded-full"
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
@@ -204,7 +207,7 @@ export const Navbar = () => {
 
               <span className={clsx(
                 "relative z-10 flex items-center gap-2 text-sm font-medium transition-colors",
-                isActive ? "text-white" : "text-slate-400 group-hover:text-slate-200"
+                isActive && showActiveBackground ? "text-white" : "text-slate-400 group-hover:text-slate-200"
               )}>
                 <Icon className="w-4 h-4" />
                 {item.name}
@@ -229,17 +232,28 @@ export const Navbar = () => {
           className="flex items-center overflow-hidden"
         >
           <div className="w-px h-4 bg-white/10 mx-1 shrink-0" />
-          <span
-            ref={titleRef}
-            className="text-sm text-slate-300 whitespace-nowrap px-2 truncate shrink-0"
-            style={{
-              // 使用固定宽度而非 maxWidth，防止 spring 回弹时被压缩
-              width: titleWidth ?? undefined,
-              maxWidth: titleWidth === null ? titleMaxWidth : undefined,
-            }}
-          >
-            {articleTitle}
-          </span>
+          <div className="relative px-2 py-1">
+            {/* 当标题展开时，activeTab 特效移动到这里 */}
+            {shouldShow && articleTitle && (
+              <motion.div
+                style={{ originY: '0px' }}
+                layoutId="activeTab"
+                className="absolute inset-0 bg-white/10 rounded-full"
+                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+              />
+            )}
+            <span
+              ref={titleRef}
+              className="relative z-10 text-sm text-white whitespace-nowrap truncate shrink-0"
+              style={{
+                // 使用固定宽度而非 maxWidth，防止 spring 回弹时被压缩
+                width: titleWidth ?? undefined,
+                maxWidth: titleWidth === null ? titleMaxWidth : undefined,
+              }}
+            >
+              {articleTitle}
+            </span>
+          </div>
         </motion.div>
 
         {/* 一个装饰性的分割线和功能按钮 */}
