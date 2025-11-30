@@ -1,0 +1,20 @@
+{
+  "metadata": {
+    "title": "博客列表 | Liquid Space",
+    "description": "探索关于前端技术、设计与未来的思考。"
+  },
+  "header": {
+    "title": "思维碎片",
+    "description": [
+      "这里汇集了我对代码、设计与未来的液态思考。",
+      "像水一样流动，像玻璃一样透明。"
+    ]
+  },
+  "list": {
+    "searchPlaceholder": "搜索灵感...",
+    "emptyState": "没有找到相关的液态想法..."
+  },
+  "post": {
+    "backToList": "返回列表"
+  }
+}

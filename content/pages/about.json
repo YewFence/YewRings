@@ -1,0 +1,19 @@
+{
+  "title": "About Me",
+  "subtitle": "Digital Creator & Developer",
+  "description": [
+    "这里是 Liquid Blog 的控制台，存放着我的思维碎片与技术实验。",
+    "如果你想探索更完整的我——包括我的项目作品、详细经历以及更多维度的数字足迹，请通过下方的传送门前往我的主宇宙。"
+  ],
+  "buttons": {
+    "personalWebsite": "访问个人主页"
+  },
+  "links": {
+    "personalWebsite": "https://your-personal-website.com"
+  },
+  "stats": {
+    "fullstack": "FullStack",
+    "network": "Network",
+    "creative": "Creative"
+  }
+}

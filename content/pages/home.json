@@ -1,0 +1,26 @@
+{
+  "hero": {
+    "title": "Liquid Blog",
+    "description": "探索数字世界的边界 · iOS 26 概念设计",
+    "techStack": "Next.js 15 · Tailwind CSS · Framer Motion",
+    "buttons": {
+      "startReading": "开始阅读",
+      "github": "GitHub"
+    },
+    "links": {
+      "github": "https://github.com"
+    }
+  },
+  "latestPosts": {
+    "title": "最新发布",
+    "lastUpdateLabel": "LAST UPDATE",
+    "viewAll": "全部文章",
+    "noPosts": "暂无文章",
+    "moreComing": {
+      "title": "更多内容筹备中",
+      "description": "敬请期待后续更新..."
+    },
+    "readMore": "阅读全文",
+    "postLabel": "Post"
+  }
+}

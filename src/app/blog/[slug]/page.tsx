@@ -18,6 +18,7 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import "katex/dist/katex.min.css";
 import type { Metadata } from "next";
+import { getPageContent } from "@/lib/content-loader";
 
 // 预生成静态路径 (SSG) - 对SEO非常重要
 export async function generateStaticParams() {
@@ -54,6 +55,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const { content, meta, headings } = getPostData(slug);
+  const pageContent = getPageContent('blog');
 
   return (
     <div className="max-w-6xl mx-auto px-4 lg:px-8 pb-20">
@@ -70,7 +72,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
             <Link href="/blog">
               <GlassButton variant="secondary" size="sm">
                 <ArrowLeft className="w-4 h-4" />
-                返回列表
+                {pageContent.post.backToList}
               </GlassButton>
             </Link>
           </BlogPostBackButton>
