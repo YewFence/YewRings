@@ -144,12 +144,16 @@ export const Navbar = () => {
   }, [isArticlePage]);
 
   return (
-    <div className="fixed top-6 inset-x-0 z-50 flex justify-center pointer-events-none">
+    <motion.div
+      layoutRoot 
+      className="fixed top-6 inset-x-0 z-50 flex justify-center pointer-events-none"
+    >
       {/* pointer-events-auto: 确保只有导航栏本身可以点击，
          不会遮挡两边的点击区域
       */}
       <motion.nav
         layout
+        style={{originY: '0px'}} 
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
@@ -191,6 +195,7 @@ export const Navbar = () => {
             <Link key={item.href} href={item.href} className="relative px-4 py-2 group">
               {isActive && (
                 <motion.div
+                  style={{originY: '0px'}} 
                   layoutId="activeTab"
                   className="absolute inset-0 bg-white/10 rounded-full"
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
@@ -244,6 +249,6 @@ export const Navbar = () => {
           <Command className="w-4 h-4" />
         </button>
       </motion.nav>
-    </div>
+    </motion.div>
   );
 };
