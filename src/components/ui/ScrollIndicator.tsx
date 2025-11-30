@@ -4,9 +4,15 @@ import React from "react";
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
-export const ScrollIndicator = () => {
+interface ScrollIndicatorProps {
+  targetId: string;
+  children?: React.ReactNode;
+  className?: string;
+}
+
+export const ScrollIndicator = ({ targetId, children, className }: ScrollIndicatorProps) => {
   const scrollToContent = () => {
-    const content = document.getElementById("latest-posts");
+    const content = document.getElementById(targetId);
     if (content) {
       content.scrollIntoView({ behavior: "smooth" });
     }
@@ -17,9 +23,14 @@ export const ScrollIndicator = () => {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 1, duration: 0.8 }}
-      className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 cursor-pointer group"
+      className={`absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 cursor-pointer group ${className || ""}`}
       onClick={scrollToContent}
     >
+      {children && (
+        <span className="text-xs font-mono text-slate-400/60 tracking-widest uppercase group-hover:text-cyan-300 transition-colors">
+          {children}
+        </span>
+      )}
       <motion.div
         animate={{ y: [0, 8, 0] }}
         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}

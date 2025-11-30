@@ -2,6 +2,7 @@ import Link from "next/link";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { GlassButton } from "@/components/ui/GlassButton";
 import { ScrollIndicator } from "@/components/ui/ScrollIndicator";
+import { TechStackSection } from "@/components/home/TechStackSection";
 import { Sparkles, ArrowRight, Github, BookOpen, Terminal } from "lucide-react";
 import { getSortedPostsData } from "@/lib/mdx";
 
@@ -48,11 +49,11 @@ export default function Home() {
         </div>
 
         {/* 滚动提示 */}
-        <ScrollIndicator />
+        <ScrollIndicator targetId="latest-posts">Latest Posts</ScrollIndicator>
       </div>
 
       {/* 最新文章区域 - 下一页 */}
-      <div id="latest-posts" className="min-h-screen w-full flex flex-col items-center justify-center bg-linear-to-b from-transparent to-black/20 py-24 px-4">
+      <div id="latest-posts" className="min-h-screen w-full flex flex-col items-center justify-center bg-linear-to-b from-transparent to-black/20 py-24 px-4 relative">
         <div className="w-full max-w-5xl space-y-8">
           <div className="flex items-center justify-between px-2 border-b border-white/5 pb-6">
             <div className="flex items-center gap-4">
@@ -114,7 +115,13 @@ export default function Home() {
             )}
           </div>
         </div>
+
+        {/* 滚动提示 */}
+        <ScrollIndicator targetId="tech-stack">Design & Tech</ScrollIndicator>
       </div>
+
+      {/* 技术栈展示区域 */}
+      <TechStackSection />
     </div>
   );
 }
