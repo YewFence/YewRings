@@ -49,7 +49,7 @@ export default function Home() {
         </div>
 
         {/* 滚动提示 */}
-        <ScrollIndicator targetId="latest-posts">Latest Posts</ScrollIndicator>
+        <ScrollIndicator targetId="latest-posts"></ScrollIndicator>
       </div>
 
       {/* 最新文章区域 - 下一页 */}
@@ -117,7 +117,7 @@ export default function Home() {
         </div>
 
         {/* 滚动提示 */}
-        <ScrollIndicator targetId="tech-stack">Design & Tech</ScrollIndicator>
+        <ScrollIndicator targetId="tech-stack"></ScrollIndicator>
       </div>
 
       {/* 技术栈展示区域 */}
