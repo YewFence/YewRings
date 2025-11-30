@@ -5,11 +5,13 @@ import { ScrollIndicator } from "@/components/ui/ScrollIndicator";
 import { TechStackSection } from "@/components/home/TechStackSection";
 import { Sparkles, ArrowRight, Github, BookOpen, Terminal } from "lucide-react";
 import { getSortedPostsData } from "@/lib/mdx";
+import { getPageContent } from "@/lib/content-loader";
 
 export default function Home() {
   // 获取最新的文章
   const allPosts = getSortedPostsData();
   const recentPosts = allPosts.slice(0, 2);
+  const content = getPageContent('home');
   
   // 计算最后更新时间（取最新文章日期，如果没有则显示初始日期）
   const lastUpdate = allPosts.length > 0 ? allPosts[0].date : "2025.11.30";
@@ -22,14 +24,14 @@ export default function Home() {
         <div className="text-center space-y-8 max-w-4xl relative z-10 -mt-20">
           
           <h1 className="text-6xl md:text-8xl font-bold tracking-tight text-transparent bg-clip-text bg-linear-to-b from-white via-white to-white/60 pb-2 leading-tight drop-shadow-2xl">
-            Liquid Blog
+            {content.hero.title}
           </h1>
           
           <p className="text-xl md:text-2xl text-slate-300/80 max-w-2xl mx-auto leading-relaxed font-light">
-            探索数字世界的边界 · iOS 26 概念设计
+            {content.hero.description}
             <br />
             <span className="text-sm text-slate-400 mt-4 flex items-center justify-center gap-3">
-              <Terminal className="w-4 h-4 text-cyan-200/80" /> Next.js 15 · Tailwind CSS · Framer Motion
+              <Terminal className="w-4 h-4 text-cyan-200/80" /> {content.hero.techStack}
             </span>
           </p>
 
@@ -37,12 +39,12 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8">
             <Link href="/blog">
               <GlassButton size="lg" icon={<BookOpen className="w-4 h-4" />}>
-                开始阅读
+                {content.hero.buttons.startReading}
               </GlassButton>
             </Link>
-            <Link href="https://github.com" target="_blank">
+            <Link href={content.hero.links.github} target="_blank">
               <GlassButton variant="secondary" size="lg" icon={<Github className="w-4 h-4" />}>
-                GitHub
+                {content.hero.buttons.github}
               </GlassButton>
             </Link>
           </div>
@@ -59,18 +61,18 @@ export default function Home() {
             <div className="flex items-center gap-4">
               <h2 className="text-3xl font-semibold text-white flex items-center gap-3">
                 <Sparkles className="w-6 h-6 text-cyan-400" />
-                最新发布
+                {content.latestPosts.title}
               </h2>
               <div className="hidden sm:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-cyan-300 backdrop-blur-md">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
                 </span>
-                <span className="tracking-wider font-mono">LAST UPDATE: {lastUpdate}</span>
+                <span className="tracking-wider font-mono">{content.latestPosts.lastUpdateLabel}: {lastUpdate}</span>
               </div>
             </div>
             <Link href="/blog" className="text-sm text-slate-400 hover:text-cyan-300 transition-colors flex items-center gap-1 group">
-              全部文章 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              {content.latestPosts.viewAll} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
 
@@ -81,7 +83,7 @@ export default function Home() {
                   <GlassCard className="p-8 group cursor-pointer h-full flex flex-col hover:bg-white/10 transition-colors border-white/5 hover:border-cyan-500/30">
                     <div className="flex items-center justify-between mb-6">
                       <div className="px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs font-mono">
-                        Post
+                        {content.latestPosts.postLabel}
                       </div>
                       <span className="text-xs font-mono text-slate-400">{post.date}</span>
                     </div>
@@ -92,14 +94,14 @@ export default function Home() {
                       {post.description}
                     </p>
                     <div className="flex items-center text-sm text-cyan-300 font-medium mt-auto pt-6 border-t border-white/5">
-                      阅读全文 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      {content.latestPosts.readMore} <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </GlassCard>
                 </Link>
               ))
             ) : (
               <div className="col-span-2 text-center py-12 text-slate-500">
-                暂无文章
+                {content.latestPosts.noPosts}
               </div>
             )}
 
@@ -109,8 +111,8 @@ export default function Home() {
                   <div className="p-4 rounded-full bg-white/5 mb-4">
                     <Sparkles className="w-8 h-8 text-slate-600" />
                   </div>
-                  <h3 className="text-xl text-slate-300 mb-2">更多内容筹备中</h3>
-                  <p className="text-slate-500 text-sm">敬请期待后续更新...</p>
+                  <h3 className="text-xl text-slate-300 mb-2">{content.latestPosts.moreComing.title}</h3>
+                  <p className="text-slate-500 text-sm">{content.latestPosts.moreComing.description}</p>
                </GlassCard>
             )}
           </div>

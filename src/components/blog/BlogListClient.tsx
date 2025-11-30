@@ -40,7 +40,7 @@ interface ClonedCardData {
   rect: DOMRect;
 }
 
-export default function BlogListClient({ posts }: { posts: PostMeta[] }) {
+export default function BlogListClient({ posts, searchPlaceholder, emptyState }: { posts: PostMeta[], searchPlaceholder: string, emptyState: string }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [clonedCard, setClonedCard] = useState<ClonedCardData | null>(null);
   const { isTransitioning, phase, targetSlug, startTransition, setPhase } = useTransition();
@@ -117,7 +117,7 @@ export default function BlogListClient({ posts }: { posts: PostMeta[] }) {
         </div>
         <input
           type="text"
-          placeholder="搜索灵感..."
+          placeholder={searchPlaceholder}
           className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:bg-white/10 transition-all shadow-lg"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -153,7 +153,7 @@ export default function BlogListClient({ posts }: { posts: PostMeta[] }) {
         ) : (
           /* 空状态 */
           <motion.div variants={itemVariants} className="col-span-full text-center py-20">
-            <p className="text-slate-500 text-lg">没有找到相关的液态想法...</p>
+            <p className="text-slate-500 text-lg">{emptyState}</p>
           </motion.div>
         )}
       </motion.div>
