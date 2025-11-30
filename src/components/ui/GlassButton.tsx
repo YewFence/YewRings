@@ -13,7 +13,7 @@ interface GlassButtonProps extends Omit<HTMLMotionProps<"button">, "children"> {
   children?: React.ReactNode;
   variant?: "primary" | "secondary";
   size?: "sm" | "md" | "lg";
-  icon?: React.ElementType;
+  icon?: React.ReactNode;
 }
 
 export const GlassButton: React.FC<GlassButtonProps> = ({
@@ -21,7 +21,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
   className,
   variant = "primary",
   size = "md",
-  icon: Icon,
+  icon,
   ...props
 }) => {
   const isPrimary = variant === "primary";
@@ -55,7 +55,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
       )} />
 
       {/* 图标渲染 */}
-      {Icon && <Icon className="w-4 h-4" />}
+      {icon}
       
       <span className="relative z-10 flex items-center gap-2">{children}</span>
     </motion.button>
