@@ -89,18 +89,6 @@ export const Navbar = () => {
     return () => window.removeEventListener("resize", calculateMaxWidth);
   }, [shouldShow, articleTitle]);
 
-  // 检测路由变化，跳过动画
-  useEffect(() => {
-    if (prevPathnameRef.current !== pathname) {
-      setSkipAnimation(true);
-      prevPathnameRef.current = pathname;
-      // 下一帧恢复动画
-      requestAnimationFrame(() => {
-        setSkipAnimation(false);
-      });
-    }
-  }, [pathname]);
-
   // 监听滚动
   useEffect(() => {
     if (!isArticlePage) {
@@ -202,9 +190,7 @@ export const Navbar = () => {
               : { width: 0, opacity: 0 }
           }
           transition={
-            skipAnimation
-              ? { duration: 0 }
-              : { type: "spring", stiffness: 300, damping: 25 }
+              { type: "spring", stiffness: 300, damping: 25 }
           }
           className="flex items-center min-w-0"
         >
