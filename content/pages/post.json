@@ -1,0 +1,17 @@
+{
+  "license": {
+    "title": "版权声明",
+    "text_prefix": "本文采用",
+    "link_text": "CC BY 4.0 知识共享署名 4.0 国际许可协议",
+    "link_url": "https://creativecommons.org/licenses/by/4.0/deed.zh",
+    "text_suffix": "。",
+    "reprint_text_prefix": "转载请务必保留本文的",
+    "reprint_text_link": "文章链接",
+    "reprint_text_middle": "及",
+    "reprint_text_author": "作者署名",
+    "reprint_text_suffix": "。",
+    "copy_button_text": "复制",
+    "copied_button_text": "已复制",
+    "copy_suffix": "(License: CC BY 4.0)"
+  }
+}

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Navbar } from "@/components/ui/Navbar";
 import { TransitionProvider } from "@/contexts/TransitionContext";
 import { PageTransitionOverlay } from "@/components/ui/PageTransitionOverlay";
+import { Footer } from "@/components/ui/Footer";
 import { getMetaContent } from "@/lib/content-loader";
 
 const meta = getMetaContent();
@@ -37,7 +38,10 @@ export default function RootLayout({
           <Navbar />
 
           {/* 3. 主要内容 */}
-          <main className="relative z-10 pt-24 px-4">{children}</main>
+          <main className="relative z-10 pt-24 px-4 min-h-[calc(100vh-200px)]">{children}</main>
+
+          {/* 页脚 */}
+          <Footer siteName={meta.site.name} />
 
           {/* 4. 页面过渡动画覆盖层 */}
           <PageTransitionOverlay />
