@@ -11,6 +11,9 @@ WORKDIR /app
 # 复制 package.json 和 lock 文件
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
+# 设置环境变量，告诉 Next.js 开启 standalone 模式
+ENV BUILD_STANDALONE=true
+
 # 安装依赖
 RUN pnpm install --frozen-lockfile
 
