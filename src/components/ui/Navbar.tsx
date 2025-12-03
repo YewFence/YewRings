@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Home, User, BookOpen, Command, ArrowLeft } from "lucide-react";
 import { clsx } from "clsx";
 
@@ -15,6 +15,12 @@ const navItems = [
 
 // 最小边距阈值（两侧各保留的最小空间）
 const MIN_MARGIN = 70;
+// 返回按钮及分隔符的预估宽度
+const BACK_BUTTON_WIDTH = 50;
+// 标题所需的最小舒适宽度
+const MIN_TITLE_WIDTH = 140;
+// 紧凑模式下比完整模式节省的宽度预估 (3个项目 * (文字宽度 + gap))
+const COMPACT_SAVING = 120;
 
 export const Navbar = () => {
   const pathname = usePathname();
@@ -23,9 +29,9 @@ export const Navbar = () => {
   const [skipAnimation, setSkipAnimation] = useState(false);
   const [articleTitle, setArticleTitle] = useState<string | null>(null);
   const [titleMaxWidth, setTitleMaxWidth] = useState<number>(200);
+  const [compactMode, setCompactMode] = useState(false); // 新增：紧凑模式状态
   const navRef = useRef<HTMLElement>(null);
   const navBaseWidthRef = useRef<number | null>(null); // 记录导航栏基础宽度（不含标题）
-  // 仅使用 maxWidth 控制截断，避免固定宽度导致省略失效
 
   // 判断是否在文章详情页
   const isArticlePage = pathname.startsWith("/blog/") && pathname !== "/blog";
@@ -62,31 +68,41 @@ export const Navbar = () => {
     return () => observer.disconnect();
   }, [isArticlePage, pathname]);
 
-  // 计算标题最大宽度
+  // 计算标题最大宽度和是否启用紧凑模式
   useEffect(() => {
-    const calculateMaxWidth = () => {
+    const calculateLayout = () => {
       if (!navRef.current) return;
 
       const viewportWidth = window.innerWidth;
 
       // 只在标题未显示时测量并记录基础宽度，避免动画期间的循环依赖
+      // 这个基础宽度必须是"完整模式"下的宽度
       if (!shouldShow && navBaseWidthRef.current === null) {
         navBaseWidthRef.current = navRef.current.getBoundingClientRect().width;
       }
 
-      // 使用记录的基础宽度，如果没有则用当前宽度
+      // 使用记录的基础宽度
       const baseWidth = navBaseWidthRef.current ?? navRef.current.getBoundingClientRect().width;
 
-      // 可用空间 = 视窗宽度 - 导航栏基础宽度 - 两侧最小边距
-      const availableWidth = viewportWidth - baseWidth - MIN_MARGIN * 2;
+      // 计算完整模式下留给标题的空间
+      const spaceForTitleFull = viewportWidth - baseWidth - BACK_BUTTON_WIDTH - MIN_MARGIN * 2;
+
+      // 判定是否需要紧凑模式：如果完整模式下标题空间不足，则开启紧凑模式
+      const isCompact = spaceForTitleFull < MIN_TITLE_WIDTH;
+      setCompactMode(isCompact);
+
+      // 计算实际可用于标题的宽度
+      // 如果是紧凑模式，导航栏占用的宽度会减少 COMPACT_SAVING
+      const effectiveNavWidth = isCompact ? (baseWidth - COMPACT_SAVING) : baseWidth;
+      const availableWidth = viewportWidth - effectiveNavWidth - BACK_BUTTON_WIDTH - MIN_MARGIN * 2;
 
       // 限制最大宽度，最小为 0
       setTitleMaxWidth(Math.max(0, availableWidth));
     };
 
-    calculateMaxWidth();
-    window.addEventListener("resize", calculateMaxWidth);
-    return () => window.removeEventListener("resize", calculateMaxWidth);
+    calculateLayout();
+    window.addEventListener("resize", calculateLayout);
+    return () => window.removeEventListener("resize", calculateLayout);
   }, [shouldShow, articleTitle]);
 
   // 监听滚动
@@ -157,7 +173,7 @@ export const Navbar = () => {
           const Icon = item.icon;
 
           // 当标题展开时，博客 tab 的特效应该转移到标题上
-          const showActiveBackground = isActive && !(item.href === "/blog" && shouldShow && articleTitle);
+          const showActiveBackground = isActive && !(item.href === "/blog" && shouldShow && articleTitle && !compactMode);
 
           return (
             <Link key={item.href} href={item.href} className="relative px-4 py-2 group">
@@ -175,7 +191,9 @@ export const Navbar = () => {
                 isActive && showActiveBackground ? "text-white" : "text-slate-400 group-hover:text-slate-200"
               )}>
                 <Icon className="w-4 h-4" />
-                {item.name}
+                   <span>
+                     {item.name}
+                   </span>
               </span>
             </Link>
           );
@@ -185,7 +203,7 @@ export const Navbar = () => {
         <motion.div
           initial={false}
           animate={
-            showBackButton && articleTitle
+            showBackButton && articleTitle && !compactMode
               ? { width: "auto", opacity: 1 }
               : { width: 0, opacity: 0 }
           }
@@ -197,7 +215,7 @@ export const Navbar = () => {
           <div className="w-px h-4 bg-white/10 mx-1 shrink-0" />
           <div className="relative px-4 py-2 flex items-center min-w-0">
             {/* 当标题展开时，activeTab 特效移动到这里 */}
-            {shouldShow && articleTitle && (
+            {shouldShow && articleTitle && !compactMode && (
               <motion.div
                 style={{ originY: '0px' }}
                 layoutId="activeTab"
