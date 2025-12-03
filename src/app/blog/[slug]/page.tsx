@@ -10,6 +10,7 @@ import {
   BlogPostBackButton,
 } from "@/components/blog/BlogPostContent";
 import { BlogPostGlassCard } from "@/components/blog/BlogPostGlassCard";
+import { LicenseCard } from "@/components/blog/LicenseCard";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import rehypeSlug from "rehype-slug";
@@ -56,6 +57,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const { content, meta, headings } = getPostData(slug);
   const pageContent = getPageContent('blog');
+  const postPageContent = getPageContent('post'); // Load post.json content
 
   return (
     <div className="max-w-6xl mx-auto px-4 lg:px-8 pb-20">
@@ -93,6 +95,9 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
                     },
                   }}
                 />
+                
+                {/* 版权声明组件 */}
+                <LicenseCard title={meta.title} slug={slug} config={postPageContent.license} />
               </article>
             </BlogPostContent>
           </BlogPostGlassCard>
