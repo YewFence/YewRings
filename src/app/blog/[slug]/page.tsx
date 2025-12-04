@@ -60,7 +60,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
   const postPageContent = getPageContent('post'); // Load post.json content
 
   return (
-    <div className="max-w-6xl mx-auto px-4 lg:px-8 pb-20">
+    <div className="max-w-6xl mx-auto px-2 sm:px-4 lg:px-8 pb-20">
       <div className="lg:grid lg:grid-cols-4 lg:gap-12">
         {/* 左侧 TOC (仅在 lg 及以上屏幕显示) */}
         <BlogPostSidebar>
@@ -83,9 +83,9 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           <BlogPostHeader title={meta.title} description={meta.description} date={meta.date} author={meta.author} />
 
           {/* 文章正文容器 */}
-          <BlogPostGlassCard className="p-8 md:p-12">
+          <BlogPostGlassCard className="p-4 sm:p-8 md:p-12">
             <BlogPostContent>
-              <article className="prose prose-invert prose-lg max-w-none prose-headings:font-bold prose-a:text-cyan-300 hover:prose-a:text-cyan-200">
+              <article className="prose prose-invert md:prose-lg max-w-none prose-headings:font-bold prose-a:text-cyan-300 hover:prose-a:text-cyan-200">
                 <MDXRemote
                   source={content}
                   options={{
