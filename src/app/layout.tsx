@@ -15,7 +15,27 @@ export const metadata: Metadata = {
   },
   description: meta.site.description,
   icons: {
-    icon: "/logo.svg",
+    // 桌面浏览器常用（路径统一至 /icon）
+    icon: [
+      { url: "/icon/favicon.ico" },
+      { url: "/icon/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/icon/logo.svg", type: "image/svg+xml" },
+    ],
+    // iOS 设备主屏幕图标（必须 PNG，建议 180x180）
+    apple: [
+      { url: "/icon/apple-touch-icon.png", sizes: "180x180" },
+    ],
+    // 旧版浏览器或快捷方式图标
+    shortcut: [
+      { url: "/icon/favicon.ico" },
+    ],
+  },
+  manifest: "/site.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: meta.site.name,
   },
 };
 
