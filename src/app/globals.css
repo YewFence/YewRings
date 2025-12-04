@@ -131,3 +131,12 @@ body {
   font-size: 0.875em;
   color: #e2e8f0;
 }
+
+/*
+  修复列表缩进问题。
+  不使用 :where() 确保选择器有更高特异性。
+*/
+.prose ul:not([class~="not-prose"] *),
+.prose ol:not([class~="not-prose"] *) {
+  padding-left: 1.1rem;
+}
