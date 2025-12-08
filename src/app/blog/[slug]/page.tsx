@@ -80,7 +80,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           </BlogPostBackButton>
 
           {/* 头部信息 */}
-          <BlogPostHeader title={meta.title} description={meta.description} date={meta.date} author={meta.author} />
+          <BlogPostHeader title={meta.title} description={meta.description} date={meta.date} updatedAt={meta.updatedAt} author={meta.author} />
 
           {/* 文章正文容器 */}
           <BlogPostGlassCard className="p-4 sm:p-8 md:p-12">

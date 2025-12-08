@@ -35,6 +35,7 @@ export type PostMeta = {
   slug: string;
   title: string;
   date: string;
+  updatedAt?: string; // 文章更新日期
   description: string;
   author?: string;
   category?: string;
@@ -115,10 +116,32 @@ export function getSortedPostsData(): PostMeta[] {
     const fileContents = fs.readFileSync(fullPath, 'utf8');
     const { data } = matter(fileContents);
 
-    return {
+    const postData: PostMeta = {
       slug,
-      ...data,
-    } as PostMeta;
+      date: data.date,
+      title: data.title,
+      description: data.description,
+      author: data.author,
+      category: data.category,
+    };
+
+    let updatedAt: string | undefined;
+
+    if (data.updated) {
+      if (data.updated === 'auto') {
+        const stats = fs.statSync(fullPath);
+        updatedAt = stats.mtime.toISOString().split('T')[0];
+      } else {
+        updatedAt = data.updated;
+      }
+      
+      // 如果修改日期和创建日期不同，则添加 updatedAt
+      if (updatedAt && postData.date !== updatedAt) {
+        postData.updatedAt = updatedAt;
+      }
+    }
+
+    return postData;
   });
 
   return allPostsData.sort((a, b) => (a.date < b.date ? 1 : -1));
@@ -135,9 +158,33 @@ export function getPostData(slug: string) {
   // 如果文章没有指定 author，则使用默认配置
   const author = data.author || defaultMeta.author || '';
 
+  const meta: Omit<PostMeta, 'slug'> = { 
+    date: data.date,
+    title: data.title,
+    description: data.description,
+    category: data.category,
+    author,
+  };
+
+  let updatedAt: string | undefined;
+
+  if (data.updated) {
+    if (data.updated === 'auto') {
+      const stats = fs.statSync(fullPath);
+      updatedAt = stats.mtime.toISOString().split('T')[0];
+    } else {
+      updatedAt = data.updated;
+    }
+
+    // 如果修改日期和创建日期不同，则添加 updatedAt
+    if (updatedAt && meta.date !== updatedAt) {
+      meta.updatedAt = updatedAt;
+    }
+  }
+
   return {
     content,
-    meta: { ...data, author } as Omit<PostMeta, 'slug'>,
+    meta,
     headings,
   };
 }
