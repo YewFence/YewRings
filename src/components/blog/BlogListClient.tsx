@@ -43,11 +43,13 @@ interface ClonedCardData {
 
 export default function BlogListClient({ 
   posts, 
+  allPosts: providedAllPosts,
   searchPlaceholder, 
   emptyState,
   currentCategory 
 }: { 
   posts: PostMeta[], 
+  allPosts?: PostMeta[],
   searchPlaceholder: string, 
   emptyState: string,
   currentCategory?: string 
@@ -118,13 +120,14 @@ export default function BlogListClient({
   // 获取所有存在的分类
   const allCategories = useMemo(() => {
     const categoriesSet = new Set<string>(["All"]);
-    posts.forEach((post: PostMeta) => {
+    const postsToUse = providedAllPosts || posts;
+    postsToUse.forEach((post: PostMeta) => {
       if (post.category) {
         categoriesSet.add(post.category);
       }
     });
     return Array.from(categoriesSet);
-  }, [posts]);
+  }, [posts, providedAllPosts]);
 
   return (
     <div className="w-full max-w-5xl mx-auto">

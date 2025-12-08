@@ -22,6 +22,7 @@ export default function BlogPage() {
       {/* 2. 将数据传递给客户端组件进行渲染和交互 */}
       <BlogListClient 
         posts={allPosts} 
+        allPosts={allPosts}
         searchPlaceholder={content.list.searchPlaceholder} 
         emptyState={content.list.emptyState} 
       />
