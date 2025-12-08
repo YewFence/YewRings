@@ -20,7 +20,11 @@ export default function BlogPage() {
       <BlogPageHeader title={content.header.title} description={content.header.description} />
 
       {/* 2. 将数据传递给客户端组件进行渲染和交互 */}
-      <BlogListClient posts={allPosts} searchPlaceholder={content.list.searchPlaceholder} emptyState={content.list.emptyState} />
+      <BlogListClient 
+        posts={allPosts} 
+        searchPlaceholder={content.list.searchPlaceholder} 
+        emptyState={content.list.emptyState} 
+      />
     </div>
   );
 }

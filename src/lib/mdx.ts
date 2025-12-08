@@ -37,6 +37,7 @@ export type PostMeta = {
   date: string;
   description: string;
   author?: string;
+  category?: string;
 };
 
 export type Heading = {
