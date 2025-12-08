@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface BlogSubNavbarProps {
   allCategories: string[];
@@ -9,6 +9,7 @@ interface BlogSubNavbarProps {
   onCategoryChange?: (category: string) => void;
   isTransitioning: boolean;
   currentCategory?: string;
+  categoryDisplayNames?: Record<string, string>;
 }
 
 export default function BlogSubNavbar({
@@ -16,21 +17,14 @@ export default function BlogSubNavbar({
   selectedCategory,
   onCategoryChange,
   isTransitioning,
-  currentCategory
+  currentCategory,
+  categoryDisplayNames = {}
 }: BlogSubNavbarProps) {
-  const router = useRouter();
-
-  const handleCategoryClick = (category: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    
+  const handleCategoryClick = (category: string) => {
     // 更新本地状态（如果提供了回调）
     if (onCategoryChange) {
       onCategoryChange(category);
     }
-    
-    // 执行路由跳转
-    const href = category === "All" ? "/blog" : `/blog/category/${category.toLowerCase()}`;
-    router.push(href);
   };
 
   return (
@@ -44,19 +38,24 @@ export default function BlogSubNavbar({
         const isActive = selectedCategory === category;
         const href = category === "All" ? "/blog" : `/blog/category/${category.toLowerCase()}`;
         
+        // 获取显示名称：优先使用categoryDisplayNames，否则使用默认格式化
+        const displayName = category === "All" 
+          ? "All" 
+          : categoryDisplayNames[category] || category.charAt(0).toUpperCase() + category.slice(1);
+        
         return (
-          <a
+          <Link
             key={category}
             href={href}
-            onClick={(e) => handleCategoryClick(category, e)}
+            onClick={() => handleCategoryClick(category)}
             className={`px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium cursor-pointer
               ${isActive
                 ? 'bg-white/10 text-white shadow-md'
                 : 'bg-transparent text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
           >
-            {category === "All" ? "All" : category.charAt(0).toUpperCase() + category.slice(1)}
-          </a>
+            {displayName}
+          </Link>
         );
       })}
     </motion.div>

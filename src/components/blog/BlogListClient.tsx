@@ -46,13 +46,15 @@ export default function BlogListClient({
   allPosts: providedAllPosts,
   searchPlaceholder, 
   emptyState,
-  currentCategory 
+  currentCategory,
+  categoryDisplayNames = {}
 }: { 
   posts: PostMeta[], 
   allPosts?: PostMeta[],
   searchPlaceholder: string, 
   emptyState: string,
-  currentCategory?: string 
+  currentCategory?: string,
+  categoryDisplayNames?: Record<string, string>
 }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [clonedCard, setClonedCard] = useState<ClonedCardData | null>(null);
@@ -147,6 +149,7 @@ export default function BlogListClient({
         onCategoryChange={setSelectedCategory}
         isTransitioning={isTransitioning}
         currentCategory={currentCategory}
+        categoryDisplayNames={categoryDisplayNames}
       />
 
       {/* 文章网格 */}

@@ -1,0 +1,12 @@
+{
+    "technology": {
+        "name": "技术",
+        "title": "技术类文章",
+        "description": ["Posts related to the latest technology trends and innovations."]
+    },
+    "essay": {
+        "name": "随笔",
+        "title": "随笔类文章",
+        "description": ["Thought-provoking essays on various topics."]
+    }
+}

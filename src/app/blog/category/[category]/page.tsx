@@ -2,7 +2,7 @@ import { getSortedPostsData } from "@/lib/mdx";
 import BlogListClient from "@/components/blog/BlogListClient";
 import { BlogPageHeader } from "@/components/blog/BlogPageHeader";
 import { Metadata } from "next";
-import { getPageContent, getPageMetadata } from "@/lib/content-loader";
+import { getPageContent, getPageMetadata, getCategoryConfig, getAllCategoryDisplayNames } from "@/lib/content-loader";
 import { notFound } from "next/navigation";
 
 interface CategoryPageProps {
@@ -73,17 +73,29 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     notFound();
   }
   
+  // 获取分类配置
+  const categoryConfig = getCategoryConfig(category);
+  
+  // 使用分类配置或回退到默认值
+  const displayName = categoryConfig?.name || category.charAt(0).toUpperCase() + category.slice(1);
+  const displayTitle = categoryConfig?.title || `${displayName} Articles`;
+  const displayDescription = categoryConfig?.description || [`Browse all ${category} articles`, ""];
+  const emptyStateText = `No ${category} articles found.`;
+  
+  // 获取所有分类的显示名称映射
+  const categoryDisplayNames = getAllCategoryDisplayNames();
+  
   // 修改页面标题和描述
   const modifiedContent = {
     ...content,
     header: {
       ...content.header,
-      title: `${category.charAt(0).toUpperCase() + category.slice(1)} Articles`,
-      description: `Browse all ${category} articles`,
+      title: displayTitle,
+      description: displayDescription,
     },
     list: {
       ...content.list,
-      emptyState: `No ${category} articles found.`,
+      emptyState: emptyStateText,
     },
   };
 
@@ -102,6 +114,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         searchPlaceholder={modifiedContent.list.searchPlaceholder} 
         emptyState={modifiedContent.list.emptyState}
         currentCategory={category}
+        categoryDisplayNames={categoryDisplayNames}
       />
     </div>
   );
