@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
+import { useInView } from "react-intersection-observer";
 import { ClonedCard, BlogCardContent } from "@/components/blog/ClonedCard";
+import BlogSubNavbar from "@/components/blog/BlogSubNavbar";
 import { useTransition } from "@/contexts/TransitionContext";
 import type { PostMeta } from "@/lib/mdx";
 
@@ -33,6 +34,46 @@ const itemVariants = {
   exit: { opacity: 0, y: -20, transition: { duration: 0.2 } },
 } as const;
 
+interface LazyBlogCardProps {
+  post: PostMeta;
+  onCardClick: (post: PostMeta, slug: string) => void;
+  setCardRef: (slug: string, element: HTMLDivElement | null) => void;
+  isTransitioning: boolean;
+  index: number;
+}
+
+function LazyBlogCard({ post, onCardClick, setCardRef, isTransitioning, index }: LazyBlogCardProps) {
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    threshold: 0.3,
+    rootMargin: "50px 0px",
+  });
+
+  return (
+    <motion.div
+      key={post.slug}
+      ref={ref}
+      variants={itemVariants}
+      initial="hidden"
+      animate={isTransitioning ? "exit" : (inView ? "show" : "hidden")}
+      transition={{ 
+        type: "spring", 
+        stiffness: 50
+      }}
+    >
+      <div
+        onClick={() => onCardClick(post, post.slug)}
+        className="cursor-pointer"
+      >
+        <BlogCardContent
+          ref={(el) => setCardRef(post.slug, el)}
+          post={post}
+        />
+      </div>
+    </motion.div>
+  );
+}
+
 // 克隆卡片的信息类型
 interface ClonedCardData {
   slug: string;
@@ -40,12 +81,27 @@ interface ClonedCardData {
   rect: DOMRect;
 }
 
-export default function BlogListClient({ posts, searchPlaceholder, emptyState }: { posts: PostMeta[], searchPlaceholder: string, emptyState: string }) {
-  const [searchQuery, setSearchQuery] = useState("");
+export default function BlogListClient({ 
+  posts, 
+  allPosts: providedAllPosts,
+  searchPlaceholder, 
+  emptyState,
+  currentCategory,
+  categoryDisplayNames = {}
+}: { 
+  posts: PostMeta[], 
+  allPosts?: PostMeta[],
+  searchPlaceholder: string, 
+  emptyState: string,
+  currentCategory?: string,
+  categoryDisplayNames?: Record<string, string>
+}) {
   const [clonedCard, setClonedCard] = useState<ClonedCardData | null>(null);
   const { isTransitioning, phase, targetSlug, startTransition, setPhase } = useTransition();
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const router = useRouter();
+
+  const [selectedCategory, setSelectedCategory] = useState(currentCategory || "All");
 
   // preparing 阶段完成后（200ms），切换到 navigating 并执行路由跳转
   useEffect(() => {
@@ -62,12 +118,20 @@ export default function BlogListClient({ posts, searchPlaceholder, emptyState }:
     }
   }, [phase, targetSlug, router, setPhase]);
 
-  // 前端过滤逻辑
-  const filteredPosts = posts.filter(
-    (post) =>
-      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // 分类过滤逻辑
+  const filteredPosts = posts.filter(post => {
+    if (selectedCategory === "All") {
+      return true;
+    }
+    return post.category === selectedCategory;
+  });
+  
+  // 如果提供了currentCategory，则自动选中该分类
+  useEffect(() => {
+    if (currentCategory && currentCategory !== selectedCategory) {
+      setSelectedCategory(currentCategory);
+    }
+  }, [currentCategory, selectedCategory]);
 
   // 处理卡片点击
   const handleCardClick = useCallback(
@@ -94,6 +158,18 @@ export default function BlogListClient({ posts, searchPlaceholder, emptyState }:
     }
   }, []);
 
+  // 获取所有存在的分类
+  const allCategories = useMemo(() => {
+    const categoriesSet = new Set<string>(["All"]);
+    const postsToUse = providedAllPosts || posts;
+    postsToUse.forEach((post: PostMeta) => {
+      if (post.category) {
+        categoriesSet.add(post.category);
+      }
+    });
+    return Array.from(categoriesSet);
+  }, [posts, providedAllPosts]);
+
   return (
     <div className="w-full max-w-5xl mx-auto">
       {/* 克隆卡片（脱离动画容器，不会被淡出） */}
@@ -105,58 +181,42 @@ export default function BlogListClient({ posts, searchPlaceholder, emptyState }:
         />
       )}
 
-      {/* 搜索栏区域 */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: isTransitioning ? 0 : 1, y: isTransitioning ? -20 : 0 }}
-        transition={{ duration: 0.3 }}
-        className="relative mb-12 max-w-xl mx-auto"
-      >
-        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
-          <Search className="h-5 w-5 text-slate-400" />
-        </div>
-        <input
-          type="text"
-          placeholder={searchPlaceholder}
-          className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:bg-white/10 transition-all shadow-lg"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        {/* 装饰性光晕 */}
-        <div className="absolute inset-0 -z-10 rounded-2xl bg-cyan-500/20 blur-xl opacity-0 focus-within:opacity-100 transition-opacity duration-500" />
-      </motion.div>
+      {/* 子导航栏组件 */}
+      <BlogSubNavbar
+        allCategories={allCategories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+        isTransitioning={isTransitioning}
+        currentCategory={currentCategory}
+        categoryDisplayNames={categoryDisplayNames}
+      />
 
-      {/* 文章网格 */}
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate={isTransitioning ? "exit" : "show"}
-        className="grid grid-cols-1 md:grid-cols-2 gap-6"
-      >
+      {/* 文章网格 - 使用瀑布流布局 */}
+      <div className="columns-1 md:columns-2 gap-6 space-y-6">
         {filteredPosts.length > 0 ? (
-          filteredPosts.map((post) => (
-            <motion.div
-              key={post.slug}
-              variants={itemVariants}
-            >
-              <div
-                onClick={() => handleCardClick(post, post.slug)}
-                className="cursor-pointer"
-              >
-                <BlogCardContent
-                  ref={(el) => setCardRef(post.slug, el)}
-                  post={post}
-                />
-              </div>
-            </motion.div>
+          filteredPosts.map((post, index) => (
+            <div key={post.slug} className="break-inside-avoid">
+              <LazyBlogCard
+                post={post}
+                onCardClick={handleCardClick}
+                setCardRef={setCardRef}
+                isTransitioning={isTransitioning}
+                index={index}
+              />
+            </div>
           ))
         ) : (
           /* 空状态 */
-          <motion.div variants={itemVariants} className="col-span-full text-center py-20">
+          <motion.div 
+            variants={itemVariants}
+            initial="hidden"
+            animate={isTransitioning ? "exit" : "show"}
+            className="col-span-full text-center py-20"
+          >
             <p className="text-slate-500 text-lg">{emptyState}</p>
           </motion.div>
         )}
-      </motion.div>
+      </div>
     </div>
   );
 }
