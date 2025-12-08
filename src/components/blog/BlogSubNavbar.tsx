@@ -29,9 +29,10 @@ export default function BlogSubNavbar({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: isTransitioning ? 0 : 1, y: isTransitioning ? -20 : 0 }}
-      transition={{ duration: 0.3 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: isTransitioning ? 0 : 1 }}
+      transition={{ duration: 0.5 }}
+      layoutId="blog-sub-navbar"
       className="flex justify-center gap-4 mb-12"
     >
       {allCategories.map(category => {
