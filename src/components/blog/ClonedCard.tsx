@@ -2,7 +2,7 @@
 
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { Calendar, ArrowRight, Sparkles } from "lucide-react";
+import { Calendar, ArrowRight, Sparkles, History } from "lucide-react";
 import { GlassCard } from "@/components/ui/GlassCard";
 import type { PostMeta } from "@/lib/mdx";
 import { forwardRef } from "react";
@@ -34,9 +34,19 @@ export const BlogCardContent = forwardRef<HTMLDivElement, BlogCardContentProps>(
           <div>
             {/* 顶部元数据 */}
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2 text-xs font-mono text-cyan-300 bg-cyan-950/30 px-2 py-1 rounded-md border border-cyan-500/20">
-                <Calendar className="w-3 h-3" />
-                {post.date}
+              <div className="flex items-center flex-wrap gap-2 text-xs font-mono">
+                {/* 创建日期 */}
+                <div className="flex items-center gap-2 text-cyan-300 bg-cyan-950/30 px-2 py-1 rounded-md border border-cyan-500/20">
+                  <Calendar className="w-3 h-3" />
+                  {post.date}
+                </div>
+                {/* 更新日期（如果存在） */}
+                {post.updatedAt && (
+                  <div className="flex items-center gap-2 text-amber-300 bg-amber-950/30 px-2 py-1 rounded-md border border-amber-500/20">
+                    <History className="w-3 h-3" />
+                    {post.updatedAt}
+                  </div>
+                )}
               </div>
               <Sparkles
                 className={`w-4 h-4 text-slate-600 ${showHoverEffects ? "group-hover:text-yellow-200 transition-colors opacity-0 group-hover:opacity-100" : ""}`}
