@@ -46,7 +46,7 @@ interface LazyBlogCardProps {
 function LazyBlogCard({ post, onCardClick, setCardRef, isTransitioning, index }: LazyBlogCardProps) {
   const { ref, inView } = useInView({
     triggerOnce: true,
-    threshold: 0.1,
+    threshold: 0.3,
     rootMargin: "50px 0px",
   });
 
