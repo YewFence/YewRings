@@ -41,7 +41,7 @@ export default function BlogSubNavbar({
         
         // 获取显示名称：优先使用categoryDisplayNames，否则使用默认格式化
         const displayName = category === "All" 
-          ? "All" 
+          ? categoryDisplayNames[category] || "All"
           : categoryDisplayNames[category] || category.charAt(0).toUpperCase() + category.slice(1);
         
         return (
