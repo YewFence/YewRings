@@ -34,7 +34,6 @@ const itemVariants = {
   exit: { opacity: 0, y: -20, transition: { duration: 0.2 } },
 } as const;
 
-// 懒加载博客卡片组件（带有序交错延迟）
 interface LazyBlogCardProps {
   post: PostMeta;
   onCardClick: (post: PostMeta, slug: string) => void;
@@ -192,18 +191,19 @@ export default function BlogListClient({
         categoryDisplayNames={categoryDisplayNames}
       />
 
-      {/* 文章网格 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* 文章网格 - 使用瀑布流布局 */}
+      <div className="columns-1 md:columns-2 gap-6 space-y-6">
         {filteredPosts.length > 0 ? (
           filteredPosts.map((post, index) => (
-            <LazyBlogCard
-              key={post.slug}
-              post={post}
-              onCardClick={handleCardClick}
-              setCardRef={setCardRef}
-              isTransitioning={isTransitioning}
-              index={index}
-            />
+            <div key={post.slug} className="break-inside-avoid">
+              <LazyBlogCard
+                post={post}
+                onCardClick={handleCardClick}
+                setCardRef={setCardRef}
+                isTransitioning={isTransitioning}
+                index={index}
+              />
+            </div>
           ))
         ) : (
           /* 空状态 */
