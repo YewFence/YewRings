@@ -1,0 +1,115 @@
+---
+title: "免费且强大的邮件推送服务：Brevo SMTP Relay 申请与配置指南"
+date: "2025-12-10"
+description: "还在为个人项目或网站的邮件发送功能发愁吗？本文将详细介绍如何申请 Brevo 提供的免费 SMTP 中继服务（每天 300 封），并以 Thunderbird 邮件客户端为例，手把手教你完成配置，轻松实现稳定、可靠的邮件推送。"
+---
+
+无论你是独立开发者、博客作者，还是小型企业主，在很多场景下我们都需要一个稳定可靠的方式来自动发送邮件，例如：
+
+*   网站用户的注册验证邮件
+*   博客订阅者的更新通知
+*   个人项目中的事件提醒
+*   绕过主机服务商对邮件功能的限制
+
+直接使用个人邮箱（如 Gmail, Outlook）的 SMTP 服务通常会受到严格的频率限制，且配置复杂。而专业的邮件推送服务（Transactional Email Service）则能完美解决这些问题。
+
+今天，我们将介绍一个提供慷慨免费额度的服务商——**Brevo**（原名 Sendinblue），并以流行的开源邮件客户端 **Thunderbird** 为例，向你展示如何从零开始，配置一个强大且免费的 SMTP 中继服务。
+
+> ### 本文目标
+> 1.  成功注册并激活 Brevo 的免费 SMTP 中继服务。
+> 2.  获取用于连接的服务器地址、端口和密钥。
+> 3.  在 Thunderbird 客户端中成功配置并使用 Brevo 发送邮件。
+
+---
+
+## 第一步：注册并获取 Brevo SMTP 凭证
+
+Brevo 的免费套餐每天提供 300 封邮件的发送额度，对于绝大多数个人项目和小型网站来说绰绰有余。
+
+1.  **创建 Brevo 账户**
+    *   访问 [Brevo 注册页面](https://www.brevo.com/) 并创建一个免费账户。注册过程可能需要邮箱和手机号验证。
+
+2.  **激活 SMTP 服务**
+    *   登录到你的 [Brevo 仪表盘](https://app.brevo.com/) 后，为了提高邮件的送达率和信誉，强烈建议先绑定并验证你的域名。
+    *   点击右上角你的名字，导航至 **Settings** -> **Senders, Domains, & IPs** -> [**Domains**](https://app.brevo.com/senders/domain/list)。
+    *   按照指引添加你的域名，并根据要求在你的域名 DNS 服务商处添加几条 TXT 记录以完成验证。
+
+3.  **添加发件人 (Sender)**
+    *   在 [**Senders** 标签页](https://app.brevo.com/senders/list)下，添加一个你将用来发送邮件的发件人邮箱地址。这个邮箱必须是真实有效的，因为它需要接收验证邮件。但是你可以自定义发件人名称
+    *   完成后，Brevo 会向该邮箱发送一封验证邮件。登录你的邮箱并点击邮件中的验证链接以完成发件人验证。
+    *   > 如果你的域名 DNS 服务商是Cloudflare，你可以使用你的域名配置Cloudflare Email Routing来创建自定义邮箱地址，并将其转发到你的常用邮箱。此时只要你的域名已经在 Brevo 中验证成功就无需再次验证该邮箱地址。
+
+4.  **生成 SMTP 密钥**
+    *   这是最关键的一步。点击页面右上角的你的账户名，在下拉菜单中选择 **SMTP & API**。
+    *   你将看到 SMTP 的相关连接信息。切换到 [**SMTP** 标签页](https://app.brevo.com/settings/keys/smtp)，记住以下信息：
+        *   **SMTP 服务器 (SMTP Server)**: `smtp-relay.brevo.com` 
+        *   **端口 (Port)**: `587` 
+        *   **登录名 (Login)**: Brevo 分配的随机邮件地址，形如`xxxxxxxx@smtp-brevo.com` 
+    *   点击 **Generate a new SMTP key** 按钮，给你的密钥起一个容易识别的名字（例如 `thunderbird-key`）。
+    *   点击生成后，系统会显示一长串字符。**请立即复制并妥善保管这串密钥！** 出于安全考虑，这个密钥只会出现一次，关闭后将无法再次查看。这就是我们稍后需要的“密码”。
+    *   > 实际上，这个密钥可以申请多个，忘记后也可以重新生成一个，所以不用太担心。但为了方便管理，建议每个应用或服务使用单独的密钥。
+
+至此，我们已经准备好了所有需要的凭证：
+*   **SMTP 服务器**: `smtp-relay.brevo.com` 
+*   **端口**: `587` [22]
+*   **登录名**: Brevo 分配的邮箱地址 
+*   **密码**: 你刚刚生成的 SMTP 密钥
+
+---
+
+## 第二步：在 Thunderbird 中配置 SMTP 服务器
+
+现在，我们将在 Thunderbird 中设置使用 Brevo 来发送邮件。
+
+1.  **打开账户设置**
+    *   在 Thunderbird 主界面，点击菜单栏的 **设置(Settings)** -> **账户设置(Account Settings)**。 
+
+2.  **进入发信服务器设置**
+    *   在左侧面板的最下方，找到并点击 **发信服务器 (SMTP)**。
+
+3.  **添加新的 SMTP 服务器**
+    *   在右侧，你会看到一个已有的 SMTP 服务器列表。点击 **添加(Add...)** 按钮。
+
+4.  **填写服务器信息**
+    *   此时会弹出一个“SMTP 服务器”设置窗口，请按照我们第一步获取的信息填写：
+        *   **描述(Description)**: 填写一个方便你识别的名称，例如 `Brevo SMTP`。
+        *   **服务器名称(Server Name)**: `smtp-relay.brevo.com`
+        *   **端口(Port)**: `587`
+        *   **连接安全(Connection security)**: 选择 `STARTTLS`。
+        *   **验证方式(Authentication method)**: 选择 `普通密码(Normal password)`。
+        *   **用户名(User Name)**: 填写 Brevo 分配的邮箱地址。
+    *   填写完毕后，点击 **确定(OK)**。
+
+5.  **为你的邮箱账户指定发信服务器**
+    *   仅仅添加了 SMTP 服务器还不够，我们还需要告诉 Thunderbird 哪个邮箱账户要用它来发信。
+    *   在“账户设置”的左侧面板，选择你想要配置的那个邮箱账户（例如 `your.email@example.com`）。
+    *   点击该账户主页右上角的 **账户设置(Account Settings)**。
+    *   点击 **账户名称(Account Name)** 下的 **管理身份(Manage Identities...)** 按钮。
+    *   新建一个身份，填写你的发件人信息：
+        *   **姓名(Name)**: 你希望收件人看到的发件人名称。
+        *   **电子邮件地址(Email Address)**: 你在 Brevo 中验证过的发件人邮箱地址。
+    *   向下滑动，找到 **发信服务器 (SMTP)** 这个下拉菜单，从列表中选择你刚刚创建的 `Brevo SMTP`。 
+
+6.  **发送测试邮件**
+    *   所有设置已完成！回到 Thunderbird 主界面，尝试用你刚刚配置的那个邮箱账户写一封新邮件并发送。
+    *   第一次发送时，Thunderbird 可能会弹窗要求你输入 `Brevo SMTP` 的密码。此时，**请粘贴你之前保存的 Brevo SMTP 密钥**，而不是你的邮箱密码或 Brevo 账户密码。你可以勾选“使用密码管理器保存此密码”以便将来自动登录。
+
+如果邮件发送成功，恭喜你！你已经成功地将 Brevo 集成到了 Thunderbird 中。
+
+> ### 其他应用场景
+> 你不仅可以在 Thunderbird 中使用 Brevo 的 SMTP 服务，还可以将这些凭证应用到任何支持 SMTP 协议的程序或服务中，配置原理是类似的，需要注意的是：
+> *   发件人信息需要与你在 Brevo 中已验证的发件人一致
+> *   端口选择 `587`
+> *   登录名使用 Brevo 分配的邮箱地址
+> *   密码使用你生成的 SMTP 密钥
+
+---
+
+### 总结： Expert solutions for expert needs
+
+至此，我们利用 Brevo 提供的免费 SMTP 中继服务，成功地为一个邮件客户端配置了稳定、高效的邮件发送通道。这个方法不仅适用于 Thunderbird，你也可以将获取到的 SMTP 凭证应用到任何支持 SMTP 协议的程序或服务中，例如 WordPress 插件、自动化脚本等。
+这个方法可以辅助你轻松实现自定义域名的邮件发送功能，详情请参考我之前的文章：[告别“完全自建”，自定义域名邮箱的收发信全攻略：Cloudflare Email Routing + Brevo SMTP Relay 实战](/blog/custom-email-address)。
+
+Brevo 每天 300 封的免费额度为个人开发者和小型项目提供了极大的便利，让你无需再担心邮件发送的限制和送达率问题。 快去试试吧！
+
+> **后记**：[Brevo](https://www.brevo.com/)已经是我能找到的最大方的邮件推送服务商之一。如果你有更高的需求，可以尝试[Resend](https://resend.com/), [Mailjet](https://www.mailjet.com/)或者[Amazon SES](https://aws.amazon.com/cn/ses/)。~~有点像广告了怎么回事~~
