@@ -18,6 +18,9 @@ export function EssayTimelineCard({
   htmlContent,
   isLeft = false,
 }: EssayTimelineCardProps) {
+  // 标题和正文都有时才显示分割线
+  const showDivider = title && htmlContent;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -50,15 +53,24 @@ export function EssayTimelineCard({
         )}
       </div>
 
-      {/* 标题（可选）+ 分割线 */}
+      {/* 标题（可选） */}
       {title && (
-        <>
-          <h1 className="text-2xl font-bold text-slate-50 mb-3">{title}</h1>
-          {/* 分割线：左侧卡片靠右，右侧卡片靠左 */}
-          <div className={`flex ${isLeft ? "justify-end" : "justify-start"} mb-4`}>
-            <div className="w-3/4 h-px bg-linear-to-r from-white/20 via-white/10 to-transparent" />
-          </div>
-        </>
+        <h1 className="text-2xl font-bold text-slate-50 mb-3">{title}</h1>
+      )}
+
+      {/* 分割线：标题和正文都有时才显示 */}
+      {showDivider && (
+        <div className={`flex ${isLeft ? "justify-end" : "justify-start"} mb-4`}>
+          {/* 左侧卡片：从右到左变深（靠右对齐，渐变从透明到白色） */}
+          {/* 右侧卡片：从左到右变深（靠左对齐，渐变从白色到透明） */}
+          <div
+            className={`w-3/4 h-px ${
+              isLeft
+                ? "bg-linear-to-l from-white/20 via-white/10 to-transparent"
+                : "bg-linear-to-r from-white/20 via-white/10 to-transparent"
+            }`}
+          />
+        </div>
       )}
 
       {/* MDX 正文内容 - 使用 dangerouslySetInnerHTML 渲染服务端生成的 HTML */}
