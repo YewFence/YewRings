@@ -10,6 +10,63 @@ import type { Node } from 'unist';
 const postsDirectory = path.join(process.cwd(), 'content/posts');
 const metaFilePath = path.join(process.cwd(), 'content/meta.json');
 
+// 文章文件信息
+interface PostFile {
+  filePath: string;              // 完整文件路径
+  slug: string;                  // 文件名（不含扩展名）
+  category: string | undefined;  // 从文件夹名推导的分类
+}
+
+/**
+ * 递归扫描目录获取所有 MDX 文章文件
+ * @returns 所有文章文件信息数组
+ */
+function getAllPostFiles(): PostFile[] {
+  const results: PostFile[] = [];
+
+  function scanDirectory(dirPath: string, category?: string) {
+    if (!fs.existsSync(dirPath)) return;
+
+    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = path.join(dirPath, entry.name);
+
+      if (entry.isDirectory()) {
+        // 递归扫描子目录，子目录名作为分类
+        scanDirectory(fullPath, entry.name);
+      } else if (entry.isFile() && entry.name.endsWith('.mdx')) {
+        results.push({
+          filePath: fullPath,
+          slug: entry.name.replace(/\.mdx$/, ''),
+          category,  // 来自文件夹名，根目录文章为 undefined
+        });
+      }
+    }
+  }
+
+  scanDirectory(postsDirectory);
+
+  // 生产环境过滤测试文章：test 分类 或 文件名以 test 开头
+  if (process.env.NODE_ENV === 'production') {
+    return results.filter((post) =>
+      post.category !== 'test' && !post.slug.startsWith('test')
+    );
+  }
+
+  return results;
+}
+
+/**
+ * 根据 slug 查找文章文件路径
+ * @param slug 文章 slug
+ * @returns 文章文件信息，未找到返回 null
+ */
+function findPostFile(slug: string): PostFile | null {
+  const postFiles = getAllPostFiles();
+  return postFiles.find((pf) => pf.slug === slug) || null;
+}
+
 type DefaultMeta = {
   author?: string;
 };
@@ -91,30 +148,10 @@ function extractHeadings(content: string): Heading[] {
 
 
 export function getSortedPostsData(): PostMeta[] {
-  // 如果目录不存在，防止报错
-  if (!fs.existsSync(postsDirectory)) {
-    return [];
-  }
-  
-  const fileNames = fs.readdirSync(postsDirectory);
-  
-  // 过滤文件：
-  // 1. 必须是 .mdx 结尾
-  // 2. 在生产环境中，过滤掉以 'test' 开头的文件
-  const filteredFileNames = fileNames.filter((fileName) => {
-    if (!fileName.endsWith('.mdx')) return false;
-    
-    if (process.env.NODE_ENV === 'production' && fileName.startsWith('test')) {
-      return false;
-    }
-    
-    return true;
-  });
+  const postFiles = getAllPostFiles();
 
-  const allPostsData = filteredFileNames.map((fileName) => {
-    const slug = fileName.replace(/\.mdx$/, '');
-    const fullPath = path.join(postsDirectory, fileName);
-    const fileContents = fs.readFileSync(fullPath, 'utf8');
+  const allPostsData = postFiles.map(({ filePath, slug, category: folderCategory }) => {
+    const fileContents = fs.readFileSync(filePath, 'utf8');
     const { data } = matter(fileContents);
 
     const postData: PostMeta = {
@@ -123,13 +160,14 @@ export function getSortedPostsData(): PostMeta[] {
       title: data.title,
       description: data.description,
       author: data.author,
-      category: data.category,
+      // 优先使用文件夹名作为分类，fallback 到 frontmatter
+      category: folderCategory || data.category,
     };
 
     // 处理 time 字段
     if (data.time) {
       if (data.time === 'auto') {
-        const stats = fs.statSync(fullPath);
+        const stats = fs.statSync(filePath);
         const mtime = stats.mtime;
         postData.time = `${String(mtime.getHours()).padStart(2, '0')}:${String(mtime.getMinutes()).padStart(2, '0')}`;
       } else {
@@ -141,12 +179,12 @@ export function getSortedPostsData(): PostMeta[] {
 
     if (data.updated) {
       if (data.updated === 'auto') {
-        const stats = fs.statSync(fullPath);
+        const stats = fs.statSync(filePath);
         updatedAt = stats.mtime.toISOString().split('T')[0];
       } else {
         updatedAt = data.updated;
       }
-      
+
       // 如果修改日期和创建日期不同，则添加 updatedAt
       if (updatedAt && postData.date !== updatedAt) {
         postData.updatedAt = updatedAt;
@@ -160,8 +198,13 @@ export function getSortedPostsData(): PostMeta[] {
 }
 
 export function getPostData(slug: string) {
-  const fullPath = path.join(postsDirectory, `${slug}.mdx`);
-  const fileContents = fs.readFileSync(fullPath, 'utf8');
+  const postFile = findPostFile(slug);
+  if (!postFile) {
+    throw new Error(`Post not found: ${slug}`);
+  }
+
+  const { filePath, category: folderCategory } = postFile;
+  const fileContents = fs.readFileSync(filePath, 'utf8');
   const { content, data } = matter(fileContents);
   const defaultMeta = getDefaultMeta();
 
@@ -174,14 +217,15 @@ export function getPostData(slug: string) {
     date: data.date,
     title: data.title,
     description: data.description,
-    category: data.category,
+    // 优先使用文件夹名作为分类，fallback 到 frontmatter
+    category: folderCategory || data.category,
     author,
   };
 
   // 处理 time 字段
   if (data.time) {
     if (data.time === 'auto') {
-      const stats = fs.statSync(fullPath);
+      const stats = fs.statSync(filePath);
       const mtime = stats.mtime;
       meta.time = `${String(mtime.getHours()).padStart(2, '0')}:${String(mtime.getMinutes()).padStart(2, '0')}`;
     } else {
@@ -193,7 +237,7 @@ export function getPostData(slug: string) {
 
   if (data.updated) {
     if (data.updated === 'auto') {
-      const stats = fs.statSync(fullPath);
+      const stats = fs.statSync(filePath);
       updatedAt = stats.mtime.toISOString().split('T')[0];
     } else {
       updatedAt = data.updated;
@@ -224,24 +268,10 @@ export type PostWithContent = PostMeta & {
  * @returns 包含完整内容的文章数组，按日期+时间降序排列
  */
 export function getPostsWithContent(category?: string): PostWithContent[] {
-  if (!fs.existsSync(postsDirectory)) {
-    return [];
-  }
+  const postFiles = getAllPostFiles();
 
-  const fileNames = fs.readdirSync(postsDirectory);
-
-  const filteredFileNames = fileNames.filter((fileName) => {
-    if (!fileName.endsWith('.mdx')) return false;
-    if (process.env.NODE_ENV === 'production' && fileName.startsWith('test')) {
-      return false;
-    }
-    return true;
-  });
-
-  const posts = filteredFileNames.map((fileName) => {
-    const slug = fileName.replace(/\.mdx$/, '');
-    const fullPath = path.join(postsDirectory, fileName);
-    const fileContents = fs.readFileSync(fullPath, 'utf8');
+  const posts = postFiles.map(({ filePath, slug, category: folderCategory }) => {
+    const fileContents = fs.readFileSync(filePath, 'utf8');
     const { content, data } = matter(fileContents);
 
     const post: PostWithContent = {
@@ -250,14 +280,15 @@ export function getPostsWithContent(category?: string): PostWithContent[] {
       title: data.title || '', // 标题可为空
       description: data.description || '',
       author: data.author,
-      category: data.category,
+      // 优先使用文件夹名作为分类，fallback 到 frontmatter
+      category: folderCategory || data.category,
       content,
     };
 
     // 处理 time 字段
     if (data.time) {
       if (data.time === 'auto') {
-        const stats = fs.statSync(fullPath);
+        const stats = fs.statSync(filePath);
         const mtime = stats.mtime;
         post.time = `${String(mtime.getHours()).padStart(2, '0')}:${String(mtime.getMinutes()).padStart(2, '0')}`;
       } else {
@@ -269,7 +300,7 @@ export function getPostsWithContent(category?: string): PostWithContent[] {
     if (data.updated) {
       let updatedAt: string;
       if (data.updated === 'auto') {
-        const stats = fs.statSync(fullPath);
+        const stats = fs.statSync(filePath);
         updatedAt = stats.mtime.toISOString().split('T')[0];
       } else {
         updatedAt = data.updated;
