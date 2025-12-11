@@ -35,6 +35,7 @@ export type PostMeta = {
   slug: string;
   title: string;
   date: string;
+  time?: string; // 文章时间 (HH:mm 格式)
   updatedAt?: string; // 文章更新日期
   description: string;
   author?: string;
@@ -125,6 +126,17 @@ export function getSortedPostsData(): PostMeta[] {
       category: data.category,
     };
 
+    // 处理 time 字段
+    if (data.time) {
+      if (data.time === 'auto') {
+        const stats = fs.statSync(fullPath);
+        const mtime = stats.mtime;
+        postData.time = `${String(mtime.getHours()).padStart(2, '0')}:${String(mtime.getMinutes()).padStart(2, '0')}`;
+      } else {
+        postData.time = data.time;
+      }
+    }
+
     let updatedAt: string | undefined;
 
     if (data.updated) {
@@ -158,13 +170,24 @@ export function getPostData(slug: string) {
   // 如果文章没有指定 author，则使用默认配置
   const author = data.author || defaultMeta.author || '';
 
-  const meta: Omit<PostMeta, 'slug'> = { 
+  const meta: Omit<PostMeta, 'slug'> = {
     date: data.date,
     title: data.title,
     description: data.description,
     category: data.category,
     author,
   };
+
+  // 处理 time 字段
+  if (data.time) {
+    if (data.time === 'auto') {
+      const stats = fs.statSync(fullPath);
+      const mtime = stats.mtime;
+      meta.time = `${String(mtime.getHours()).padStart(2, '0')}:${String(mtime.getMinutes()).padStart(2, '0')}`;
+    } else {
+      meta.time = data.time;
+    }
+  }
 
   let updatedAt: string | undefined;
 
@@ -187,4 +210,87 @@ export function getPostData(slug: string) {
     meta,
     headings,
   };
+}
+
+// 包含完整内容的文章类型
+export type PostWithContent = PostMeta & {
+  content: string;
+};
+
+/**
+ * 获取指定分类的文章列表（包含完整 MDX 内容）
+ * 用于随笔页面等需要直接展示内容的场景
+ * @param category 文章分类
+ * @returns 包含完整内容的文章数组，按日期+时间降序排列
+ */
+export function getPostsWithContent(category?: string): PostWithContent[] {
+  if (!fs.existsSync(postsDirectory)) {
+    return [];
+  }
+
+  const fileNames = fs.readdirSync(postsDirectory);
+
+  const filteredFileNames = fileNames.filter((fileName) => {
+    if (!fileName.endsWith('.mdx')) return false;
+    if (process.env.NODE_ENV === 'production' && fileName.startsWith('test')) {
+      return false;
+    }
+    return true;
+  });
+
+  const posts = filteredFileNames.map((fileName) => {
+    const slug = fileName.replace(/\.mdx$/, '');
+    const fullPath = path.join(postsDirectory, fileName);
+    const fileContents = fs.readFileSync(fullPath, 'utf8');
+    const { content, data } = matter(fileContents);
+
+    const post: PostWithContent = {
+      slug,
+      date: data.date,
+      title: data.title || '', // 标题可为空
+      description: data.description || '',
+      author: data.author,
+      category: data.category,
+      content,
+    };
+
+    // 处理 time 字段
+    if (data.time) {
+      if (data.time === 'auto') {
+        const stats = fs.statSync(fullPath);
+        const mtime = stats.mtime;
+        post.time = `${String(mtime.getHours()).padStart(2, '0')}:${String(mtime.getMinutes()).padStart(2, '0')}`;
+      } else {
+        post.time = data.time;
+      }
+    }
+
+    // 处理 updatedAt 字段
+    if (data.updated) {
+      let updatedAt: string;
+      if (data.updated === 'auto') {
+        const stats = fs.statSync(fullPath);
+        updatedAt = stats.mtime.toISOString().split('T')[0];
+      } else {
+        updatedAt = data.updated;
+      }
+      if (updatedAt && post.date !== updatedAt) {
+        post.updatedAt = updatedAt;
+      }
+    }
+
+    return post;
+  });
+
+  // 按分类过滤
+  const filteredPosts = category
+    ? posts.filter((post) => post.category?.toLowerCase() === category.toLowerCase())
+    : posts;
+
+  // 按日期+时间降序排列
+  return filteredPosts.sort((a, b) => {
+    const dateA = `${a.date} ${a.time || '00:00'}`;
+    const dateB = `${b.date} ${b.time || '00:00'}`;
+    return dateB.localeCompare(dateA);
+  });
 }

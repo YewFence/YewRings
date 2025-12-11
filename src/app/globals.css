@@ -167,3 +167,14 @@ body {
 ::-webkit-scrollbar-corner {
   background: transparent;
 }
+
+/* Timeline 时间轴样式 */
+.timeline-line {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgb(255 255 255 / 0.15) 5%,
+    rgb(255 255 255 / 0.15) 95%,
+    transparent
+  );
+}
