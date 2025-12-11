@@ -35,6 +35,7 @@ export type PostMeta = {
   slug: string;
   title: string;
   date: string;
+  time?: string; // 文章时间 (HH:mm 格式)
   updatedAt?: string; // 文章更新日期
   description: string;
   author?: string;
@@ -125,6 +126,17 @@ export function getSortedPostsData(): PostMeta[] {
       category: data.category,
     };
 
+    // 处理 time 字段
+    if (data.time) {
+      if (data.time === 'auto') {
+        const stats = fs.statSync(fullPath);
+        const mtime = stats.mtime;
+        postData.time = `${String(mtime.getHours()).padStart(2, '0')}:${String(mtime.getMinutes()).padStart(2, '0')}`;
+      } else {
+        postData.time = data.time;
+      }
+    }
+
     let updatedAt: string | undefined;
 
     if (data.updated) {
@@ -158,13 +170,24 @@ export function getPostData(slug: string) {
   // 如果文章没有指定 author，则使用默认配置
   const author = data.author || defaultMeta.author || '';
 
-  const meta: Omit<PostMeta, 'slug'> = { 
+  const meta: Omit<PostMeta, 'slug'> = {
     date: data.date,
     title: data.title,
     description: data.description,
     category: data.category,
     author,
   };
+
+  // 处理 time 字段
+  if (data.time) {
+    if (data.time === 'auto') {
+      const stats = fs.statSync(fullPath);
+      const mtime = stats.mtime;
+      meta.time = `${String(mtime.getHours()).padStart(2, '0')}:${String(mtime.getMinutes()).padStart(2, '0')}`;
+    } else {
+      meta.time = data.time;
+    }
+  }
 
   let updatedAt: string | undefined;
 
