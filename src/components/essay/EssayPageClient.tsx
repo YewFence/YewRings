@@ -28,13 +28,14 @@ export function EssayPageClient({ essays, emptyState = "暂无随笔" }: EssayPa
 
   return (
     <EssayTimeline>
-      {essays.map((essay) => (
+      {essays.map((essay, index) => (
         <EssayTimelineCard
           key={essay.slug}
           title={essay.title || undefined}
           date={essay.date}
           time={essay.time}
           htmlContent={essay.htmlContent}
+          isLeft={index % 2 === 0}
         />
       ))}
     </EssayTimeline>

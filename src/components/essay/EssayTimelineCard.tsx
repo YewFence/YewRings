@@ -8,6 +8,7 @@ interface EssayTimelineCardProps {
   date: string;
   time?: string;
   htmlContent: string; // 服务端渲染好的 HTML
+  isLeft?: boolean; // 是否在时间轴左侧（桌面端）
 }
 
 export function EssayTimelineCard({
@@ -15,6 +16,7 @@ export function EssayTimelineCard({
   date,
   time,
   htmlContent,
+  isLeft = false,
 }: EssayTimelineCardProps) {
   return (
     <motion.div
@@ -48,9 +50,15 @@ export function EssayTimelineCard({
         )}
       </div>
 
-      {/* 标题（可选） */}
+      {/* 标题（可选）+ 分割线 */}
       {title && (
-        <h3 className="text-base font-medium text-slate-100 mb-3">{title}</h3>
+        <>
+          <h1 className="text-2xl font-bold text-slate-50 mb-3">{title}</h1>
+          {/* 分割线：左侧卡片靠右，右侧卡片靠左 */}
+          <div className={`flex ${isLeft ? "justify-end" : "justify-start"} mb-4`}>
+            <div className="w-3/4 h-px bg-linear-to-r from-white/20 via-white/10 to-transparent" />
+          </div>
+        </>
       )}
 
       {/* MDX 正文内容 - 使用 dangerouslySetInnerHTML 渲染服务端生成的 HTML */}
