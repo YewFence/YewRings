@@ -191,9 +191,9 @@ export const Navbar = () => {
                 isActive && showActiveBackground ? "text-white" : "text-slate-400 group-hover:text-slate-200"
               )}>
                 <Icon className="w-4 h-4" />
-                   <span>
-                     {item.name}
-                   </span>
+                <span className="hidden sm:inline">
+                  {item.name}
+                </span>
               </span>
             </Link>
           );
