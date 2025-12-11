@@ -47,9 +47,11 @@ function getAllPostFiles(): PostFile[] {
 
   scanDirectory(postsDirectory);
 
-  // 生产环境过滤 test 分类的文章
+  // 生产环境过滤测试文章：test 分类 或 文件名以 test 开头
   if (process.env.NODE_ENV === 'production') {
-    return results.filter((post) => post.category !== 'test');
+    return results.filter((post) =>
+      post.category !== 'test' && !post.slug.startsWith('test')
+    );
   }
 
   return results;
