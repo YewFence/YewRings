@@ -2,7 +2,6 @@
 
 import { EssayTimeline } from "./EssayTimeline";
 import { EssayTimelineCard } from "./EssayTimelineCard";
-import { MDXRemoteSerializeResult } from "next-mdx-remote";
 
 // 序列化后的随笔数据类型
 export interface SerializedEssay {
@@ -10,7 +9,7 @@ export interface SerializedEssay {
   title: string;
   date: string;
   time?: string;
-  content: MDXRemoteSerializeResult;
+  htmlContent: string; // 服务端渲染好的 HTML
 }
 
 interface EssayPageClientProps {
@@ -35,7 +34,7 @@ export function EssayPageClient({ essays, emptyState = "暂无随笔" }: EssayPa
           title={essay.title || undefined}
           date={essay.date}
           time={essay.time}
-          content={essay.content}
+          htmlContent={essay.htmlContent}
         />
       ))}
     </EssayTimeline>

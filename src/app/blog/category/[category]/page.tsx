@@ -5,11 +5,14 @@ import { Metadata } from "next";
 import { getPageContent, getPageMetadata, getCategoryConfig, getAllCategoryDisplayNames } from "@/lib/content-loader";
 import { notFound } from "next/navigation";
 import { EssayPageClient, SerializedEssay } from "@/components/essay/EssayPageClient";
-import { serialize } from "next-mdx-remote/serialize";
+import BlogSubNavbar from "@/components/blog/BlogSubNavbar";
+import { unified } from "unified";
+import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
+import remarkRehype from "remark-rehype";
 import rehypeKatex from "rehype-katex";
-import BlogSubNavbar from "@/components/blog/BlogSubNavbar";
+import rehypeStringify from "rehype-stringify";
 
 interface CategoryPageProps {
   params: Promise<{
@@ -112,20 +115,26 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     // 获取包含完整内容的文章
     const essayPosts = getPostsWithContent('essay');
 
-    // 序列化 MDX 内容
+    // 将 Markdown 转换为 HTML
+    const processor = unified()
+      .use(remarkParse)
+      .use(remarkGfm)
+      .use(remarkMath)
+      .use(remarkRehype, { allowDangerousHtml: true })
+      .use(rehypeKatex)
+      .use(rehypeStringify, { allowDangerousHtml: true });
+
     const serializedEssays: SerializedEssay[] = await Promise.all(
-      essayPosts.map(async (post) => ({
-        slug: post.slug,
-        title: post.title,
-        date: post.date,
-        time: post.time,
-        content: await serialize(post.content, {
-          mdxOptions: {
-            remarkPlugins: [remarkGfm, remarkMath],
-            rehypePlugins: [rehypeKatex],
-          },
-        }),
-      }))
+      essayPosts.map(async (post) => {
+        const result = await processor.process(post.content);
+        return {
+          slug: post.slug,
+          title: post.title,
+          date: post.date,
+          time: post.time,
+          htmlContent: String(result),
+        };
+      })
     );
 
     // 所有分类列表（用于子导航栏）

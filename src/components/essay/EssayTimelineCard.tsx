@@ -1,21 +1,20 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
 import { Calendar, Clock } from "lucide-react";
 
 interface EssayTimelineCardProps {
   title?: string;
   date: string;
   time?: string;
-  content: MDXRemoteSerializeResult;
+  htmlContent: string; // 服务端渲染好的 HTML
 }
 
 export function EssayTimelineCard({
   title,
   date,
   time,
-  content,
+  htmlContent,
 }: EssayTimelineCardProps) {
   return (
     <motion.div
@@ -54,10 +53,11 @@ export function EssayTimelineCard({
         <h3 className="text-base font-medium text-slate-100 mb-3">{title}</h3>
       )}
 
-      {/* MDX 正文内容 */}
-      <div className="prose prose-sm prose-invert max-w-none text-sm text-slate-300 prose-headings:text-slate-200 prose-headings:font-medium prose-a:text-cyan-300 hover:prose-a:text-cyan-200 prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5">
-        <MDXRemote {...content} />
-      </div>
+      {/* MDX 正文内容 - 使用 dangerouslySetInnerHTML 渲染服务端生成的 HTML */}
+      <div
+        className="prose prose-sm prose-invert max-w-none text-sm text-slate-300 prose-headings:text-slate-200 prose-headings:font-medium prose-a:text-cyan-300 hover:prose-a:text-cyan-200 prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5"
+        dangerouslySetInnerHTML={{ __html: htmlContent }}
+      />
     </motion.div>
   );
 }
