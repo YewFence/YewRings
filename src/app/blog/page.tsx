@@ -12,6 +12,8 @@ export default function BlogPage() {
   // 1. 在服务端获取数据 (Server Component)
   // 这里的 fetch 是直接读取文件系统，非常快
   const allPosts = getSortedPostsData();
+  // 在全部文章页面过滤掉随笔类文章
+  const filteredPosts = allPosts.filter(post => post.category !== 'essay');
   const content = getPageContent('blog');
   const categoryDisplayNames = getAllCategoryDisplayNames();
 
@@ -21,10 +23,10 @@ export default function BlogPage() {
       <BlogPageHeader title={content.header.title} description={content.header.description} />
 
       {/* 2. 将数据传递给客户端组件进行渲染和交互 */}
-      <BlogListClient 
-        posts={allPosts} 
-        allPosts={allPosts}
-        searchPlaceholder={content.list.searchPlaceholder} 
+      <BlogListClient
+        posts={filteredPosts}
+        allPosts={filteredPosts}
+        searchPlaceholder={content.list.searchPlaceholder}
         emptyState={content.list.emptyState}
         categoryDisplayNames={categoryDisplayNames}
       />
