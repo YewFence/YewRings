@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { ComponentPropsWithoutRef } from "react";
+import { POST_IMAGE_PUBLIC_PATH } from "@/constants/path";
 
 type MdxImageProps = ComponentPropsWithoutRef<"img">;
 
@@ -14,6 +15,11 @@ export function MdxImage({ src, alt, ...props }: MdxImageProps) {
   // 外部图片或 data URI 直接使用原生 img
   const isExternal = src.startsWith("http") || src.startsWith("data:");
 
+  // 本地文章图片：不以 http/data:// 开头的相对路径
+  // 例如 "hello-world.cover.png" -> "/images/posts/hello-world.cover.png"
+  const isPostImage = !isExternal && !src.startsWith("/");
+  const resolvedSrc = isPostImage ? `/${POST_IMAGE_PUBLIC_PATH}/${src}` : src;
+
   if (isExternal) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
@@ -27,10 +33,10 @@ export function MdxImage({ src, alt, ...props }: MdxImageProps) {
     );
   }
 
-  // 本地图片使用 next/image
+  // 本地图片使用 next/image（包括文章图片和其他本地图片）
   return (
     <Image
-      src={src}
+      src={resolvedSrc}
       alt={alt || ""}
       width={800}
       height={450}
