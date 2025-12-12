@@ -37,7 +37,7 @@ export function EssayTimeline({ children }: EssayTimelineProps) {
             <div
               className={`
                 absolute left-[22px] top-[30px] w-4 h-0.5
-                bg-gradient-to-r from-cyan-400/50 to-transparent
+                bg-linear-to-r from-cyan-400/50 to-transparent
                 md:hidden
               `}
             />
@@ -48,8 +48,8 @@ export function EssayTimeline({ children }: EssayTimelineProps) {
                 hidden md:block absolute top-[30px] w-8 h-0.5
                 ${
                   index % 2 === 0
-                    ? "left-1/2 bg-gradient-to-r from-cyan-400/50 to-transparent"
-                    : "right-1/2 bg-gradient-to-l from-cyan-400/50 to-transparent"
+                    ? "left-1/2 bg-linear-to-r from-cyan-400/50 to-transparent"
+                    : "right-1/2 bg-linear-to-l from-cyan-400/50 to-transparent"
                 }
               `}
             />
