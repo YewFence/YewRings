@@ -33,9 +33,7 @@ export function LicenseCard({ title, slug, config }: LicenseCardProps) {
 
   useEffect(() => {
     // 在客户端获取完整的 URL
-    if (typeof window !== "undefined") {
-      setUrl(window.location.origin + `/blog/${slug}`);
-    }
+    setUrl(window.location.origin + `/blog/${slug}`);
   }, [slug]);
 
   const copyToClipboard = async () => {

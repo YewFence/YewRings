@@ -13,13 +13,11 @@ interface ScrollIndicatorProps {
 
 export const ScrollIndicator = ({ targetId, children, className, delay = 0 }: ScrollIndicatorProps) => {
   const [isVisible, setIsVisible] = useState(delay === 0);
-  const [isReady, setIsReady] = useState(delay === 0);
 
   // 处理延迟显示
   useEffect(() => {
     if (delay > 0) {
       const timer = setTimeout(() => {
-        setIsReady(true);
         setIsVisible(true);
       }, delay);
       return () => clearTimeout(timer);

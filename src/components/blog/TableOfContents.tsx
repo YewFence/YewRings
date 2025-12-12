@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Heading } from '@/lib/mdx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
@@ -70,7 +70,7 @@ export const TableOfContents = ({ headings }: TOCProps) => {
   const [showBottomMask, setShowBottomMask] = useState(false);
 
   // 更新折叠状态的函数
-  const updateCollapsed = (slug: string) => {
+  const updateCollapsed = useCallback((slug: string) => {
     const activeParents = getParentHeadings(headings, slug);
     const currentTopLevel = getTopLevelParent(headings, slug);
 
@@ -88,7 +88,7 @@ export const TableOfContents = ({ headings }: TOCProps) => {
       activeParents.forEach((s) => newSet.delete(s));
       return newSet;
     });
-  };
+  }, [headings]);
 
   // 滚动 TOC 容器使活动项可见
   const scrollTocToActiveItem = (slug: string) => {
@@ -124,7 +124,7 @@ export const TableOfContents = ({ headings }: TOCProps) => {
   };
 
   // 监听 TOC 容器滚动，更新遮罩显示状态
-  const updateScrollMasks = () => {
+  const updateScrollMasks = useCallback(() => {
     const el = tocRef.current;
     if (!el) return;
 
@@ -133,16 +133,17 @@ export const TableOfContents = ({ headings }: TOCProps) => {
 
     setShowTopMask(isScrollable && scrollTop > 10);
     setShowBottomMask(isScrollable && scrollTop < scrollHeight - clientHeight - 10);
-  };
+  }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     updateScrollMasks();
     const el = tocRef.current;
     if (el) {
       el.addEventListener('scroll', updateScrollMasks, { passive: true });
       return () => el.removeEventListener('scroll', updateScrollMasks);
     }
-  }, [collapsed]); // 折叠状态变化时重新计算
+  }, [collapsed, updateScrollMasks]); // 折叠状态变化时重新计算
 
   // 当活动标题变化时，滚动 TOC 使其可见
   useEffect(() => {
@@ -229,7 +230,7 @@ export const TableOfContents = ({ headings }: TOCProps) => {
       window.removeEventListener('toc-pause-scroll', handlePauseScroll);
       window.removeEventListener('toc-resume-scroll', handleResumeScroll);
     };
-  }, [headings, activeSlug]);
+  }, [headings, activeSlug, updateCollapsed]);
 
   // 点击导航项时滚动到目标位置
   const scrollToHeading = (slug: string) => {

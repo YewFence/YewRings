@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Home, User, BookOpen, Search, ArrowLeft } from "lucide-react";
 import { useSearch } from "@/contexts/SearchContext";
 import { clsx } from "clsx";
@@ -27,8 +27,6 @@ export const Navbar = () => {
   const pathname = usePathname();
   const { toggleSearch, isSearchOpen } = useSearch();
   const [showBackButton, setShowBackButton] = useState(false);
-  const prevPathnameRef = useRef(pathname);
-  const [skipAnimation, setSkipAnimation] = useState(false);
   const [articleTitle, setArticleTitle] = useState<string | null>(null);
   const [titleMaxWidth, setTitleMaxWidth] = useState<number>(200);
   const [compactMode, setCompactMode] = useState(false); // 新增：紧凑模式状态
@@ -42,6 +40,7 @@ export const Navbar = () => {
   // 从 DOM 获取文章标题
   useEffect(() => {
     if (!isArticlePage) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setArticleTitle(null);
       return;
     }
@@ -110,6 +109,7 @@ export const Navbar = () => {
   // 监听滚动
   useEffect(() => {
     if (!isArticlePage) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowBackButton(false);
       return;
     }

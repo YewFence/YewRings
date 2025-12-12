@@ -8,7 +8,6 @@ interface BlogSubNavbarProps {
   allCategories: string[];
   selectedCategory: string;
   isTransitioning: boolean;
-  currentCategory?: string;
   categoryDisplayNames?: Record<string, string>;
 }
 
@@ -16,7 +15,6 @@ export default function BlogSubNavbar({
   allCategories,
   selectedCategory,
   isTransitioning,
-  currentCategory,
   categoryDisplayNames = {}
 }: BlogSubNavbarProps) {
   return (

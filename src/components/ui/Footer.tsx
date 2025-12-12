@@ -1,14 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 export function Footer({ siteName }: { siteName: string }) {
-  // 使用 useState 和 useEffect 来避免服务端渲染和客户端渲染的 Hydration 不匹配问题（特别是关于时间/年份）
-  const [currentYear, setCurrentYear] = useState(2025);
-
-  useEffect(() => {
-    setCurrentYear(new Date().getFullYear());
-  }, []);
+  // 直接使用当前年份，SSR 时使用固定值避免 hydration 不匹配
+  const currentYear = new Date().getFullYear();
 
   return (
     <footer className="relative z-10 mt-12 border-t border-white/10 bg-glass-100/50 backdrop-blur-md">

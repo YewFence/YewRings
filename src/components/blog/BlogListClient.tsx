@@ -12,24 +12,6 @@ import { useSearch } from "@/contexts/SearchContext";
 import type { PostMeta } from "@/lib/mdx";
 import { CATEGORY_ALL, CATEGORY_ESSAY } from "@/constants/categories";
 
-// 动画变体配置：容器控制子元素的交错播放
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1, // 每个子元素间隔 0.1秒出现，形成流水感
-    },
-  },
-  exit: {
-    opacity: 0,
-    transition: {
-      staggerChildren: 0.05,
-      staggerDirection: -1,
-    },
-  },
-} as const;
-
 // 动画变体配置：单个卡片的浮现动画
 const itemVariants = {
   hidden: { opacity: 0, y: 30 },
@@ -42,10 +24,9 @@ interface LazyBlogCardProps {
   onCardClick: (post: PostMeta, slug: string) => void;
   setCardRef: (slug: string, element: HTMLDivElement | null) => void;
   isTransitioning: boolean;
-  index: number;
 }
 
-function LazyBlogCard({ post, onCardClick, setCardRef, isTransitioning, index }: LazyBlogCardProps) {
+function LazyBlogCard({ post, onCardClick, setCardRef, isTransitioning }: LazyBlogCardProps) {
   const { ref, inView } = useInView({
     triggerOnce: true,
     threshold: 0.3,
@@ -114,7 +95,7 @@ export default function BlogListClient({
     return category.trim().toLowerCase();
   }, []);
 
-  const [selectedCategory, setSelectedCategory] = useState(
+  const [selectedCategory] = useState(
     normalizeCategory(currentCategory) || CATEGORY_ALL
   );
 
@@ -162,13 +143,6 @@ export default function BlogListClient({
 
     return result;
   }, [providedAllPosts, posts, selectedCategory, currentCategory, normalizeCategory, searchQuery]);
-
-  // 如果提供了currentCategory，则自动选中该分类
-  useEffect(() => {
-    if (currentCategory) {
-      setSelectedCategory(normalizeCategory(currentCategory));
-    }
-  }, [currentCategory, normalizeCategory]);
 
   // 处理卡片点击
   const handleCardClick = useCallback(
@@ -224,7 +198,6 @@ export default function BlogListClient({
         allCategories={allCategories}
         selectedCategory={selectedCategory}
         isTransitioning={isTransitioning}
-        currentCategory={currentCategory}
         categoryDisplayNames={categoryDisplayNames}
       />
 
@@ -260,14 +233,13 @@ export default function BlogListClient({
       {/* 文章网格 - 使用瀑布流布局 */}
       <div className="columns-1 md:columns-2 gap-6 space-y-6">
         {filteredPosts.length > 0 ? (
-          filteredPosts.map((post, index) => (
+          filteredPosts.map((post) => (
             <div key={post.slug} className="break-inside-avoid">
               <LazyBlogCard
                 post={post}
                 onCardClick={handleCardClick}
                 setCardRef={setCardRef}
                 isTransitioning={isTransitioning}
-                index={index}
               />
             </div>
           ))

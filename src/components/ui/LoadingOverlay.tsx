@@ -150,7 +150,8 @@ export function LoadingOverlay() {
         clearTimeout(showTimerRef.current);
         showTimerRef.current = null;
       }
-      // 开始渐出
+      // 开始渐出 - 这里的 setState 是响应外部系统(路由)变化的正确用法
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoading(false);
     }
   }, [pathname, searchParams]);
