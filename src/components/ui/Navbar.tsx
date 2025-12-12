@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, User, BookOpen, Command, ArrowLeft } from "lucide-react";
+import { Home, User, BookOpen, Search, ArrowLeft } from "lucide-react";
+import { useSearch } from "@/contexts/SearchContext";
 import { clsx } from "clsx";
 
 const navItems = [
@@ -24,6 +25,7 @@ const COMPACT_SAVING = 120;
 
 export const Navbar = () => {
   const pathname = usePathname();
+  const { toggleSearch, isSearchOpen } = useSearch();
   const [showBackButton, setShowBackButton] = useState(false);
   const prevPathnameRef = useRef(pathname);
   const [skipAnimation, setSkipAnimation] = useState(false);
@@ -237,9 +239,18 @@ export const Navbar = () => {
 
         {/* 一个装饰性的分割线和功能按钮 */}
         <div className="w-px h-4 bg-white/10 mx-2" />
-        
-        <button className="p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition-colors">
-          <Command className="w-4 h-4" />
+
+        <button
+          onClick={toggleSearch}
+          className={clsx(
+            "p-2 rounded-full transition-colors",
+            isSearchOpen
+              ? "bg-white/10 text-white"
+              : "hover:bg-white/10 text-slate-400 hover:text-white"
+          )}
+          aria-label="搜索"
+        >
+          <Search className="w-4 h-4" />
         </button>
       </motion.nav>
     </motion.div>

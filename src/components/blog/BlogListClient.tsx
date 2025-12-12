@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useInView } from "react-intersection-observer";
+import { Search } from "lucide-react";
 import { ClonedCard, BlogCardContent } from "@/components/blog/ClonedCard";
 import BlogSubNavbar from "@/components/blog/BlogSubNavbar";
 import { useTransition } from "@/contexts/TransitionContext";
+import { useSearch } from "@/contexts/SearchContext";
 import type { PostMeta } from "@/lib/mdx";
 import { CATEGORY_ALL, CATEGORY_ESSAY } from "@/constants/categories";
 
@@ -99,8 +101,10 @@ export default function BlogListClient({
   currentCategory,
   categoryDisplayNames = {}
 }: BlogListClientProps) {
+  const [searchQuery, setSearchQuery] = useState("");
   const [clonedCard, setClonedCard] = useState<ClonedCardData | null>(null);
   const { isTransitioning, phase, targetSlug, startTransition, setPhase } = useTransition();
+  const { isSearchOpen } = useSearch();
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const router = useRouter();
 
@@ -133,18 +137,31 @@ export default function BlogListClient({
   const filteredPosts = useMemo(() => {
     const basePosts = providedAllPosts || posts;
 
+    let result: PostMeta[];
     if (selectedCategory === CATEGORY_ALL) {
       // 在主页的"全部"分类下，排除随笔文章
       if (!currentCategory) {
-        return basePosts.filter(post => normalizeCategory(post.category) !== CATEGORY_ESSAY);
+        result = basePosts.filter(post => normalizeCategory(post.category) !== CATEGORY_ESSAY);
+      } else {
+        result = basePosts;
       }
-      return basePosts;
+    } else {
+      result = basePosts.filter(post =>
+        normalizeCategory(post.category) === selectedCategory
+      );
     }
 
-    return basePosts.filter(post =>
-      normalizeCategory(post.category) === selectedCategory
-    );
-  }, [providedAllPosts, posts, selectedCategory, currentCategory, normalizeCategory]);
+    // 搜索过滤
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(post =>
+        post.title.toLowerCase().includes(query) ||
+        post.description.toLowerCase().includes(query)
+      );
+    }
+
+    return result;
+  }, [providedAllPosts, posts, selectedCategory, currentCategory, normalizeCategory, searchQuery]);
 
   // 如果提供了currentCategory，则自动选中该分类
   useEffect(() => {
@@ -210,6 +227,35 @@ export default function BlogListClient({
         currentCategory={currentCategory}
         categoryDisplayNames={categoryDisplayNames}
       />
+
+      {/* 搜索栏区域 - 平滑展开/收起 */}
+      <AnimatePresence>
+        {isSearchOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="overflow-hidden"
+          >
+            <div className="relative mb-12 max-w-xl mx-auto">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                <Search className="h-5 w-5 text-slate-400" />
+              </div>
+              <input
+                type="text"
+                placeholder={searchPlaceholder}
+                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:bg-white/10 transition-all shadow-lg"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoFocus
+              />
+              {/* 装饰性光晕 */}
+              <div className="absolute inset-0 -z-10 rounded-2xl bg-cyan-500/20 blur-xl opacity-0 focus-within:opacity-100 transition-opacity duration-500" />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* 文章网格 - 使用瀑布流布局 */}
       <div className="columns-1 md:columns-2 gap-6 space-y-6">
