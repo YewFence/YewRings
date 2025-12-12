@@ -73,15 +73,6 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       .filter(Boolean) as string[]
   ));
 
-  // 检查分类是否存在
-  const categoryExists = categories.some(cat =>
-    cat.toLowerCase() === category.toLowerCase()
-  );
-
-  if (!categoryExists) {
-    notFound();
-  }
-
   // 获取分类配置
   const categoryConfig = getCategoryConfig(category);
 

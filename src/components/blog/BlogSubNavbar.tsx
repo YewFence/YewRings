@@ -6,7 +6,6 @@ import Link from "next/link";
 interface BlogSubNavbarProps {
   allCategories: string[];
   selectedCategory: string;
-  onCategoryChange?: (category: string) => void;
   isTransitioning: boolean;
   currentCategory?: string;
   categoryDisplayNames?: Record<string, string>;
@@ -15,18 +14,10 @@ interface BlogSubNavbarProps {
 export default function BlogSubNavbar({
   allCategories,
   selectedCategory,
-  onCategoryChange,
   isTransitioning,
   currentCategory,
   categoryDisplayNames = {}
 }: BlogSubNavbarProps) {
-  const handleCategoryClick = (category: string) => {
-    // 更新本地状态（如果提供了回调）
-    if (onCategoryChange) {
-      onCategoryChange(category);
-    }
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -48,7 +39,6 @@ export default function BlogSubNavbar({
           <Link
             key={category}
             href={href}
-            onClick={() => handleCategoryClick(category)}
             className={`px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium cursor-pointer
               ${isActive
                 ? 'bg-white/10 text-white shadow-md'

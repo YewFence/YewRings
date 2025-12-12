@@ -185,7 +185,6 @@ export default function BlogListClient({
       <BlogSubNavbar
         allCategories={allCategories}
         selectedCategory={selectedCategory}
-        onCategoryChange={setSelectedCategory}
         isTransitioning={isTransitioning}
         currentCategory={currentCategory}
         categoryDisplayNames={categoryDisplayNames}
