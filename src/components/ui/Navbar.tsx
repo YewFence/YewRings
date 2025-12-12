@@ -37,6 +37,9 @@ export const Navbar = () => {
   const isArticlePage = pathname.startsWith("/blog/") && pathname !== "/blog";
   const shouldShow = isArticlePage && showBackButton;
 
+  // 判断是否应该显示搜索按钮（只在博客列表页和分类页显示）
+  const showSearchButton = pathname === "/blog" || pathname.startsWith("/blog/category/");
+
   // 从 DOM 获取文章标题
   useEffect(() => {
     if (!isArticlePage) {
@@ -238,22 +241,26 @@ export const Navbar = () => {
           </div>
         </motion.div>
 
-        {/* 一个装饰性的分割线和功能按钮 */}
-        <div className="w-px h-4 bg-white/10 mx-2" />
+        {/* 一个装饰性的分割线和功能按钮 - 只在博客列表页和分类页显示 */}
+        {showSearchButton && (
+          <>
+            <div className="w-px h-4 bg-white/10 mx-2" />
 
-        <button
-          onClick={toggleSearch}
-          className={clsx(
-            "p-2 rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none",
-            isSearchOpen
-              ? "bg-white/10 text-white"
-              : "hover:bg-white/10 text-slate-400 hover:text-white"
-          )}
-          aria-label="搜索"
-          aria-expanded={isSearchOpen}
-        >
-          <Search className="w-4 h-4" aria-hidden="true" />
-        </button>
+            <button
+              onClick={toggleSearch}
+              className={clsx(
+                "p-2 rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none",
+                isSearchOpen
+                  ? "bg-white/10 text-white"
+                  : "hover:bg-white/10 text-slate-400 hover:text-white"
+              )}
+              aria-label="搜索"
+              aria-expanded={isSearchOpen}
+            >
+              <Search className="w-4 h-4" aria-hidden="true" />
+            </button>
+          </>
+        )}
       </motion.nav>
     </motion.div>
   );
