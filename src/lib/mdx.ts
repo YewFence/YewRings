@@ -56,7 +56,8 @@ function getAllPostFiles(): PostFile[] {
   scanDirectory(postsDirectory);
 
   // 生产环境过滤测试文章：test 分类 或 文件名以 test 开头
-  if (process.env.NODE_ENV === 'production') {
+  // 可以通过设置环境变量 INCLUDE_TEST_POSTS=true 来包含测试文章
+  if (process.env.NODE_ENV === 'production' && process.env.INCLUDE_TEST_POSTS !== 'true') {
     postFilesCache = results.filter((post) =>
       post.category !== 'test' && !post.slug.startsWith('test')
     );

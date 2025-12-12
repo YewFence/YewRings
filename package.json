@@ -8,10 +8,9 @@
     "dev": "next dev",
     "prebuild": "pnpm copy-images",
     "build": "next build",
+    "build:test": "cross-env INCLUDE_TEST_POSTS=true pnpm build",
     "start": "next start",
-    "lint": "eslint",
-    "tests:hide": "node scripts/manage-tests.js hide",
-    "tests:show": "node scripts/manage-tests.js show"
+    "lint": "eslint"
   },
   "dependencies": {
     "@types/unist": "^3.0.3",
@@ -43,6 +42,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.7",
     "tailwindcss": "^4",
