@@ -18,6 +18,7 @@ interface LicenseConfig {
   reprint_text_suffix: string;
   copy_button_text: string;
   copied_button_text: string;
+  copy_error_text: string;
   copy_suffix: string;
 }
 
@@ -117,7 +118,7 @@ export function LicenseCard({ title, slug, config }: LicenseCardProps) {
                     className="flex items-center gap-1.5 text-red-400"
                   >
                     <X className="w-3.5 h-3.5" />
-                    复制失败
+                    {config.copy_error_text}
                   </motion.span>
                 ) : (
                   <motion.span

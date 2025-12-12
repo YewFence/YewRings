@@ -59,6 +59,7 @@ export interface PostPageContent {
     reprint_text_suffix: string;
     copy_button_text: string;
     copied_button_text: string;
+    copy_error_text: string;
     copy_suffix: string;
   };
 }
