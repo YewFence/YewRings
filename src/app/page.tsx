@@ -5,7 +5,8 @@ import { ScrollIndicator } from "@/components/ui/ScrollIndicator";
 import { TechStackSection } from "@/components/home/TechStackSection";
 import { Sparkles, ArrowRight, Github, BookOpen, Terminal } from "lucide-react";
 import { getSortedPostsData } from "@/lib/mdx";
-import { getPageContent, getPageMetadata } from "@/lib/content-loader";
+import { getPageContent, getPageMetadata, getCategoryConfig } from "@/lib/content-loader";
+import { CATEGORY_ESSAY } from "@/constants/categories";
 import { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -13,9 +14,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function Home() {
-  // 获取最新的文章
+  // 获取最新的文章（排除随笔类型）
   const allPosts = getSortedPostsData();
-  const recentPosts = allPosts.slice(0, 2);
+  const recentPosts = allPosts
+    .filter((post) => post.category?.toLowerCase() !== CATEGORY_ESSAY)
+    .slice(0, 2);
   const content = getPageContent('home');
   
   // 计算最后更新时间（取最新文章日期，如果没有则显示初始日期）
@@ -83,27 +86,32 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {recentPosts.length > 0 ? (
-              recentPosts.map((post) => (
-                <Link key={post.slug} href={`/blog/${post.slug}`} className="block h-full">
-                  <GlassCard className="p-8 group cursor-pointer h-full flex flex-col hover:bg-white/10 transition-colors border-white/5 hover:border-cyan-500/30">
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs font-mono">
-                        {content.latestPosts.postLabel}
+              recentPosts.map((post) => {
+                const categoryName = post.category
+                  ? getCategoryConfig(post.category)?.name || post.category
+                  : content.latestPosts.postLabel;
+                return (
+                  <Link key={post.slug} href={`/blog/${post.slug}`} className="block h-full">
+                    <GlassCard className="p-8 group cursor-pointer h-full flex flex-col hover:bg-white/10 transition-colors border-white/5 hover:border-cyan-500/30">
+                      <div className="flex items-center justify-between mb-6">
+                        <div className="px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs font-mono">
+                          {categoryName}
+                        </div>
+                        <span className="text-xs font-mono text-slate-400">{post.date}</span>
                       </div>
-                      <span className="text-xs font-mono text-slate-400">{post.date}</span>
-                    </div>
-                    <h3 className="text-3xl font-semibold mb-4 text-white group-hover:text-cyan-200 transition-colors line-clamp-2">
-                      {post.title}
-                    </h3>
-                    <p className="text-slate-400 mb-6 line-clamp-3 grow text-base leading-relaxed">
-                      {post.description}
-                    </p>
-                    <div className="flex items-center text-sm text-cyan-300 font-medium mt-auto pt-6 border-t border-white/5">
-                      {content.latestPosts.readMore} <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </div>
-                  </GlassCard>
-                </Link>
-              ))
+                      <h3 className="text-3xl font-semibold mb-4 text-white group-hover:text-cyan-200 transition-colors line-clamp-2">
+                        {post.title}
+                      </h3>
+                      <p className="text-slate-400 mb-6 line-clamp-3 grow text-base leading-relaxed">
+                        {post.description}
+                      </p>
+                      <div className="flex items-center text-sm text-cyan-300 font-medium mt-auto pt-6 border-t border-white/5">
+                        {content.latestPosts.readMore} <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </GlassCard>
+                  </Link>
+                );
+              })
             ) : (
               <div className="col-span-2 text-center py-12 text-slate-500">
                 {content.latestPosts.noPosts}
