@@ -27,7 +27,7 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // MDX/KaTeX 需要
+      "script-src 'self' 'unsafe-inline'", // MDX 需要 unsafe-inline
       "style-src 'self' 'unsafe-inline'", // Tailwind/KaTeX 需要
       "img-src 'self' data: https:", // 允许 HTTPS 图片
       "font-src 'self' data:", // next/font 自托管
