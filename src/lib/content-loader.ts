@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 
 const contentDirectory = path.join(process.cwd(), 'content/pages');
 const metaPath = path.join(process.cwd(), 'content/meta.json');
-const categoriesPath = path.join(process.cwd(), 'content/pages/categorites.json');
+const categoriesPath = path.join(process.cwd(), 'content/pages/categories.json');
 
 export function getPageContent<T = any>(pageName: string): T {
   const fullPath = path.join(contentDirectory, `${pageName}.json`);
