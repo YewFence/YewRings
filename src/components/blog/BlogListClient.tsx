@@ -125,7 +125,7 @@ export default function BlogListClient({
     if (selectedCategory === "All") {
       // 在主页的"全部"分类下，排除随笔文章
       if (!currentCategory) {
-        return basePosts.filter(post => post.category?.toLowerCase() !== "随笔");
+        return basePosts.filter(post => post.category?.toLowerCase() !== "essay");
       }
       return basePosts;
     }
