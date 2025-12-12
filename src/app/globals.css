@@ -178,3 +178,38 @@ body {
     transparent
   );
 }
+
+/* Loading 螺旋动画 */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spin-reverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@utility animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+@utility animate-spin-medium {
+  animation: spin-slow 5s linear infinite;
+}
+
+@utility animate-spin-fast {
+  animation: spin-slow 3s linear infinite;
+}
+
+@utility animate-spin-reverse-medium {
+  animation: spin-reverse 6s linear infinite;
+}
+
+@utility animate-spin-reverse-fast {
+  animation: spin-reverse 4s linear infinite;
+}
+
+@utility animate-spin-reverse-fastest {
+  animation: spin-reverse 2.5s linear infinite;
+}

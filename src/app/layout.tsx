@@ -1,8 +1,10 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Navbar } from "@/components/ui/Navbar";
 import { TransitionProvider } from "@/contexts/TransitionContext";
 import { PageTransitionOverlay } from "@/components/ui/PageTransitionOverlay";
+import { LoadingOverlay } from "@/components/ui/LoadingOverlay";
 import { Footer } from "@/components/ui/Footer";
 import { getMetaContent } from "@/lib/content-loader";
 
@@ -65,6 +67,11 @@ export default function RootLayout({
 
           {/* 4. 页面过渡动画覆盖层 */}
           <PageTransitionOverlay />
+
+          {/* 5. 路由切换 Loading 覆盖层 */}
+          <Suspense fallback={null}>
+            <LoadingOverlay />
+          </Suspense>
         </TransitionProvider>
       </body>
     </html>
