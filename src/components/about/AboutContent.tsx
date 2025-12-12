@@ -5,8 +5,9 @@ import { motion } from "framer-motion";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { GlassButton } from "@/components/ui/GlassButton";
 import { ExternalLink, User, Sparkles, Globe, Cpu, Network } from "lucide-react";
+import type { AboutPageContent } from "@/types/content";
 
-export function AboutContent({ content }: { content: any }) {
+export function AboutContent({ content }: { content: AboutPageContent }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden pt-20 px-4">
       {/* 动态背景装饰 */}

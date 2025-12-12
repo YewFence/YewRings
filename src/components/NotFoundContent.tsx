@@ -4,8 +4,9 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { GlassButton } from "@/components/ui/GlassButton";
 import { Home, FileQuestion, CloudOff } from "lucide-react";
+import type { NotFoundPageContent } from "@/types/content";
 
-export function NotFoundContent({ content }: { content: any }) {
+export function NotFoundContent({ content }: { content: NotFoundPageContent }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
       {/* 背景装饰 */}

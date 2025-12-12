@@ -1,18 +1,38 @@
 import fs from 'fs';
 import path from 'path';
 import type { Metadata } from 'next';
+import type {
+  AboutPageContent,
+  BlogPageContent,
+  PostPageContent,
+  HomePageContent,
+  MetaContent,
+  PageMetadata,
+  NotFoundPageContent,
+} from '@/types/content';
 
 const contentDirectory = path.join(process.cwd(), 'content/pages');
 const metaPath = path.join(process.cwd(), 'content/meta.json');
 const categoriesPath = path.join(process.cwd(), 'content/pages/categories.json');
 
-export function getPageContent<T = any>(pageName: string): T {
+// 页面名称到内容类型的映射
+type PageContentMap = {
+  about: AboutPageContent;
+  blog: BlogPageContent;
+  post: PostPageContent;
+  home: HomePageContent;
+  'not-found': NotFoundPageContent;
+};
+
+export function getPageContent<K extends keyof PageContentMap>(pageName: K): PageContentMap[K];
+export function getPageContent(pageName: string): { metadata?: PageMetadata };
+export function getPageContent(pageName: string): unknown {
   const fullPath = path.join(contentDirectory, `${pageName}.json`);
   const fileContents = fs.readFileSync(fullPath, 'utf8');
   return JSON.parse(fileContents);
 }
 
-export function getMetaContent<T = any>(): T {
+export function getMetaContent(): MetaContent {
   const fileContents = fs.readFileSync(metaPath, 'utf8');
   return JSON.parse(fileContents);
 }
