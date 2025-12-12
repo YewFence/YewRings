@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { ShieldCheck, Copy, Check, Link as LinkIcon } from "lucide-react";
+import { ShieldCheck, Copy, Check, X, Link as LinkIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface LicenseConfig {
@@ -28,7 +28,7 @@ interface LicenseCardProps {
 }
 
 export function LicenseCard({ title, slug, config }: LicenseCardProps) {
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState<"idle" | "success" | "error">("idle");
   const [url, setUrl] = useState("");
 
   useEffect(() => {
@@ -40,10 +40,11 @@ export function LicenseCard({ title, slug, config }: LicenseCardProps) {
     try {
       const textToCopy = `${title}\n${url}\n${config.copy_suffix}`;
       await navigator.clipboard.writeText(textToCopy);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
+      setCopyState("success");
+      setTimeout(() => setCopyState("idle"), 2000);
+    } catch {
+      setCopyState("error");
+      setTimeout(() => setCopyState("idle"), 2000);
     }
   };
 
@@ -96,7 +97,7 @@ export function LicenseCard({ title, slug, config }: LicenseCardProps) {
               title="复制文章链接及版权信息"
             >
               <AnimatePresence mode="wait">
-                {copied ? (
+                {copyState === "success" ? (
                   <motion.span
                     key="check"
                     initial={{ opacity: 0, scale: 0.8 }}
@@ -106,6 +107,17 @@ export function LicenseCard({ title, slug, config }: LicenseCardProps) {
                   >
                     <Check className="w-3.5 h-3.5" />
                     {config.copied_button_text}
+                  </motion.span>
+                ) : copyState === "error" ? (
+                  <motion.span
+                    key="error"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    className="flex items-center gap-1.5 text-red-400"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    复制失败
                   </motion.span>
                 ) : (
                   <motion.span
