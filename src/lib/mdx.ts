@@ -117,6 +117,47 @@ interface HeadingNode extends Node {
 }
 
 /**
+ * 处理文章的时间字段
+ * @param dataTime frontmatter 中的 time 值
+ * @param filePath 文件路径（用于获取文件修改时间）
+ * @returns 格式化后的时间字符串，或 undefined
+ */
+function resolveTime(dataTime: string | undefined, filePath: string): string | undefined {
+  if (!dataTime) return undefined;
+
+  if (dataTime === 'auto') {
+    const stats = fs.statSync(filePath);
+    const mtime = stats.mtime;
+    return `${String(mtime.getHours()).padStart(2, '0')}:${String(mtime.getMinutes()).padStart(2, '0')}`;
+  }
+
+  return dataTime;
+}
+
+/**
+ * 处理文章的更新日期字段
+ * @param dataUpdated frontmatter 中的 updated 值
+ * @param filePath 文件路径（用于获取文件修改时间）
+ * @param date 文章创建日期（用于比较是否需要显示更新日期）
+ * @returns 更新日期字符串，如果与创建日期相同则返回 undefined
+ */
+function resolveUpdatedAt(
+  dataUpdated: string | undefined,
+  filePath: string,
+  date: string
+): string | undefined {
+  if (!dataUpdated) return undefined;
+
+  const updatedAt =
+    dataUpdated === 'auto'
+      ? fs.statSync(filePath).mtime.toISOString().split('T')[0]
+      : dataUpdated;
+
+  // 如果修改日期和创建日期相同，则不返回 updatedAt
+  return updatedAt !== date ? updatedAt : undefined;
+}
+
+/**
  * 从 MDX 内容中提取标题
  * @param content MDX 文件内容
  * @returns 标题数组
@@ -162,34 +203,9 @@ export function getSortedPostsData(): PostMeta[] {
       author: data.author,
       // 优先使用文件夹名作为分类，fallback 到 frontmatter
       category: folderCategory || data.category,
+      time: resolveTime(data.time, filePath),
+      updatedAt: resolveUpdatedAt(data.updated, filePath, data.date),
     };
-
-    // 处理 time 字段
-    if (data.time) {
-      if (data.time === 'auto') {
-        const stats = fs.statSync(filePath);
-        const mtime = stats.mtime;
-        postData.time = `${String(mtime.getHours()).padStart(2, '0')}:${String(mtime.getMinutes()).padStart(2, '0')}`;
-      } else {
-        postData.time = data.time;
-      }
-    }
-
-    let updatedAt: string | undefined;
-
-    if (data.updated) {
-      if (data.updated === 'auto') {
-        const stats = fs.statSync(filePath);
-        updatedAt = stats.mtime.toISOString().split('T')[0];
-      } else {
-        updatedAt = data.updated;
-      }
-
-      // 如果修改日期和创建日期不同，则添加 updatedAt
-      if (updatedAt && postData.date !== updatedAt) {
-        postData.updatedAt = updatedAt;
-      }
-    }
 
     return postData;
   });
@@ -220,34 +236,9 @@ export function getPostData(slug: string) {
     // 优先使用文件夹名作为分类，fallback 到 frontmatter
     category: folderCategory || data.category,
     author,
+    time: resolveTime(data.time, filePath),
+    updatedAt: resolveUpdatedAt(data.updated, filePath, data.date),
   };
-
-  // 处理 time 字段
-  if (data.time) {
-    if (data.time === 'auto') {
-      const stats = fs.statSync(filePath);
-      const mtime = stats.mtime;
-      meta.time = `${String(mtime.getHours()).padStart(2, '0')}:${String(mtime.getMinutes()).padStart(2, '0')}`;
-    } else {
-      meta.time = data.time;
-    }
-  }
-
-  let updatedAt: string | undefined;
-
-  if (data.updated) {
-    if (data.updated === 'auto') {
-      const stats = fs.statSync(filePath);
-      updatedAt = stats.mtime.toISOString().split('T')[0];
-    } else {
-      updatedAt = data.updated;
-    }
-
-    // 如果修改日期和创建日期不同，则添加 updatedAt
-    if (updatedAt && meta.date !== updatedAt) {
-      meta.updatedAt = updatedAt;
-    }
-  }
 
   return {
     content,
@@ -283,32 +274,9 @@ export function getPostsWithContent(category?: string): PostWithContent[] {
       // 优先使用文件夹名作为分类，fallback 到 frontmatter
       category: folderCategory || data.category,
       content,
+      time: resolveTime(data.time, filePath),
+      updatedAt: resolveUpdatedAt(data.updated, filePath, data.date),
     };
-
-    // 处理 time 字段
-    if (data.time) {
-      if (data.time === 'auto') {
-        const stats = fs.statSync(filePath);
-        const mtime = stats.mtime;
-        post.time = `${String(mtime.getHours()).padStart(2, '0')}:${String(mtime.getMinutes()).padStart(2, '0')}`;
-      } else {
-        post.time = data.time;
-      }
-    }
-
-    // 处理 updatedAt 字段
-    if (data.updated) {
-      let updatedAt: string;
-      if (data.updated === 'auto') {
-        const stats = fs.statSync(filePath);
-        updatedAt = stats.mtime.toISOString().split('T')[0];
-      } else {
-        updatedAt = data.updated;
-      }
-      if (updatedAt && post.date !== updatedAt) {
-        post.updatedAt = updatedAt;
-      }
-    }
 
     return post;
   });
