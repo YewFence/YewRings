@@ -213,3 +213,59 @@ body {
 @utility animate-spin-reverse-fastest {
   animation: spin-reverse 2.5s linear infinite;
 }
+
+/* ===== 可访问性 - 全局焦点样式 ===== */
+
+/* 键盘焦点样式 - 只在键盘导航时显示 */
+*:focus-visible {
+  outline: 2px solid #22d3ee; /* cyan-400 */
+  outline-offset: 2px;
+}
+
+/* 移除默认 focus 样式，只保留 focus-visible */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* 按钮和链接的焦点样式 */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+}
+
+/* 输入框焦点样式 */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 0;
+}
+
+/* 跳过导航链接 - 为键盘用户提供快速跳转 */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.skip-to-content:focus {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  width: auto;
+  height: auto;
+  padding: 1rem 1.5rem;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  color: #f8fafc;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+}

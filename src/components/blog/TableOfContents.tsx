@@ -306,13 +306,16 @@ export const TableOfContents = ({ headings }: TOCProps) => {
           {childHeadings.length > 0 && (
             <button
               onClick={() => toggleCollapse(heading.slug)}
-              className="p-1 rounded-md hover:bg-white/10 text-slate-500 hover:text-slate-300"
+              className="p-1 rounded-md hover:bg-white/10 text-slate-500 hover:text-slate-300 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
+              aria-expanded={!isCollapsed}
+              aria-label={isCollapsed ? `展开 ${heading.text} 的子标题` : `折叠 ${heading.text} 的子标题`}
             >
               <ChevronDown
                 className={clsx(
                   'w-4 h-4 transition-transform',
                   !isCollapsed && '-rotate-90'
                 )}
+                aria-hidden="true"
               />
             </button>
           )}
@@ -323,10 +326,11 @@ export const TableOfContents = ({ headings }: TOCProps) => {
               scrollToHeading(heading.slug);
             }}
             className={clsx(
-              'relative flex-1 py-1 px-2 text-sm transition-colors rounded-r-md',
+              'relative flex-1 py-1 px-2 text-sm transition-colors rounded-r-md focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none',
               isActive ? 'text-cyan-300' : 'text-slate-400 hover:text-slate-200',
               { 'ml-5': childHeadings.length === 0 } // 对没有子项的进行缩进
             )}
+            aria-current={isActive ? 'location' : undefined}
           >
             {isActive && (
               <motion.div
@@ -363,7 +367,7 @@ export const TableOfContents = ({ headings }: TOCProps) => {
   const topLevelHeadings = headings.filter((h) => h.level === 2);
 
   return (
-    <nav className="sticky top-24">
+    <nav className="sticky top-24" aria-label="文章目录">
       {/* 外层容器：圆角边框和背景 */}
       <div className="rounded-2xl bg-black/20 border border-white/10 backdrop-blur-lg shadow-lg shadow-black/20 overflow-hidden">
         {/* 顶部高光 */}

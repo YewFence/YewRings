@@ -159,9 +159,10 @@ export const Navbar = () => {
           >
             <Link
               href="/blog"
-              className="p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+              className="p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
+              aria-label="返回博客列表"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-4 h-4" aria-hidden="true" />
             </Link>
             <div className="w-px h-4 bg-white/10 mx-1" />
           </motion.div>
@@ -178,7 +179,7 @@ export const Navbar = () => {
           const showActiveBackground = isActive && !(item.href === "/blog" && shouldShow && articleTitle && !compactMode);
 
           return (
-            <Link key={item.href} href={item.href} className="relative px-4 py-2 group">
+            <Link key={item.href} href={item.href} className="relative px-4 py-2 group rounded-full focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none">
               {showActiveBackground && (
                 <motion.div
                   style={{originY: '0px'}}
@@ -243,14 +244,15 @@ export const Navbar = () => {
         <button
           onClick={toggleSearch}
           className={clsx(
-            "p-2 rounded-full transition-colors",
+            "p-2 rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none",
             isSearchOpen
               ? "bg-white/10 text-white"
               : "hover:bg-white/10 text-slate-400 hover:text-white"
           )}
           aria-label="搜索"
+          aria-expanded={isSearchOpen}
         >
-          <Search className="w-4 h-4" />
+          <Search className="w-4 h-4" aria-hidden="true" />
         </button>
       </motion.nav>
     </motion.div>

@@ -33,6 +33,13 @@ function LazyBlogCard({ post, onCardClick, setCardRef, isTransitioning }: LazyBl
     rootMargin: "50px 0px",
   });
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onCardClick(post, post.slug);
+    }
+  };
+
   return (
     <motion.div
       key={post.slug}
@@ -40,14 +47,18 @@ function LazyBlogCard({ post, onCardClick, setCardRef, isTransitioning }: LazyBl
       variants={itemVariants}
       initial="hidden"
       animate={isTransitioning ? "exit" : (inView ? "show" : "hidden")}
-      transition={{ 
-        type: "spring", 
+      transition={{
+        type: "spring",
         stiffness: 50
       }}
     >
       <div
+        role="article"
+        tabIndex={0}
         onClick={() => onCardClick(post, post.slug)}
-        className="cursor-pointer"
+        onKeyDown={handleKeyDown}
+        className="cursor-pointer focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none rounded-2xl"
+        aria-label={`阅读文章: ${post.title}`}
       >
         <BlogCardContent
           ref={(el) => setCardRef(post.slug, el)}

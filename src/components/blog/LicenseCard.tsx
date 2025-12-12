@@ -58,7 +58,7 @@ export function LicenseCard({ title, slug, config }: LicenseCardProps) {
         <div className="flex flex-col gap-4">
           {/* 头部：图标和许可名称 */}
           <div className="flex items-center gap-3 text-pink-200">
-            <ShieldCheck className="w-6 h-6" />
+            <ShieldCheck className="w-6 h-6" aria-hidden="true" />
             <h3 className="font-bold text-lg">{config.title}</h3>
           </div>
 
@@ -70,7 +70,7 @@ export function LicenseCard({ title, slug, config }: LicenseCardProps) {
                 href={config.link_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-pink-400 hover:text-pink-300 font-semibold underline decoration-pink-400/30 underline-offset-2 transition-colors"
+                className="text-pink-400 hover:text-pink-300 font-semibold underline decoration-pink-400/30 underline-offset-2 transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none rounded"
               >
                 {config.link_text}
               </a>
@@ -87,14 +87,14 @@ export function LicenseCard({ title, slug, config }: LicenseCardProps) {
 
           {/* 链接复制区域 */}
           <div className="flex items-center gap-2 p-2 rounded-lg bg-black/20 border border-white/5 mt-2">
-             <LinkIcon className="w-4 h-4 text-slate-400 ml-2 shrink-0" />
+             <LinkIcon className="w-4 h-4 text-slate-400 ml-2 shrink-0" aria-hidden="true" />
             <code className="flex-1 text-xs text-slate-300 truncate font-mono select-all">
               {url || `.../blog/${slug}`}
             </code>
             <button
               onClick={copyToClipboard}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 text-xs font-medium text-white transition-colors"
-              title="复制文章链接及版权信息"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 text-xs font-medium text-white transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
+              aria-label="复制文章链接及版权信息"
             >
               <AnimatePresence mode="wait">
                 {copyState === "success" ? (

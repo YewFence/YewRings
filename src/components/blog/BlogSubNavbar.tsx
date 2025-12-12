@@ -37,11 +37,12 @@ export default function BlogSubNavbar({
           <Link
             key={category}
             href={href}
-            className={`px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium cursor-pointer
+            className={`px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium cursor-pointer focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none
               ${isActive
                 ? 'bg-white/10 text-white shadow-md'
                 : 'bg-transparent text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
+            aria-current={isActive ? 'page' : undefined}
           >
             {displayName}
           </Link>
