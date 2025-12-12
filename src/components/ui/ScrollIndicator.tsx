@@ -3,15 +3,17 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
+import ariaConfig from "@content/pages/aria.json";
 
 interface ScrollIndicatorProps {
   targetId: string;
   children?: React.ReactNode;
   className?: string;
   delay?: number; // 延迟显示时间（毫秒）
+  ariaLabel?: string; // 显式指定无障碍标签
 }
 
-export const ScrollIndicator = ({ targetId, children, className, delay = 0 }: ScrollIndicatorProps) => {
+export const ScrollIndicator = ({ targetId, children, className, delay = 0, ariaLabel }: ScrollIndicatorProps) => {
   const [isVisible, setIsVisible] = useState(delay === 0);
 
   // 处理延迟显示
@@ -65,7 +67,7 @@ export const ScrollIndicator = ({ targetId, children, className, delay = 0 }: Sc
           transition={{ duration: 0.5 }}
           className={`absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 cursor-pointer group focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none rounded-lg p-2 ${className || ""}`}
           onClick={scrollToContent}
-          aria-label={children ? String(children) : "向下滚动查看更多内容"}
+          aria-label={ariaLabel || ariaConfig.buttons.scrollDown}
         >
           {children && (
             <span className="text-xs font-mono text-slate-400/60 tracking-widest uppercase group-hover:text-cyan-300 transition-colors" aria-hidden="true">

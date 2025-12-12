@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ArrowUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { clsx } from "clsx";
+import ariaConfig from "@content/pages/aria.json";
 
 export const ScrollToTopButton = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -70,7 +71,7 @@ export const ScrollToTopButton = () => {
             "group", // 用于 hover 效果
             "focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
           )}
-          aria-label="回到顶部"
+          aria-label={ariaConfig.buttons.scrollToTop}
         >
           {/* 进度填充层 */}
           <div

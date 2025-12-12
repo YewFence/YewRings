@@ -5,6 +5,7 @@ import type { Heading } from '@/lib/mdx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
 import { ChevronDown } from 'lucide-react';
+import ariaConfig from "@content/pages/aria.json";
 
 interface TOCProps {
   headings: Heading[];
@@ -308,7 +309,9 @@ export const TableOfContents = ({ headings }: TOCProps) => {
               onClick={() => toggleCollapse(heading.slug)}
               className="p-1 rounded-md hover:bg-white/10 text-slate-500 hover:text-slate-300 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
               aria-expanded={!isCollapsed}
-              aria-label={isCollapsed ? `展开 ${heading.text} 的子标题` : `折叠 ${heading.text} 的子标题`}
+              aria-label={isCollapsed
+                ? ariaConfig.tableOfContents.expandSubheadings.replace('{heading}', heading.text)
+                : ariaConfig.tableOfContents.collapseSubheadings.replace('{heading}', heading.text)}
             >
               <ChevronDown
                 className={clsx(
@@ -367,7 +370,7 @@ export const TableOfContents = ({ headings }: TOCProps) => {
   const topLevelHeadings = headings.filter((h) => h.level === 2);
 
   return (
-    <nav className="sticky top-24" aria-label="文章目录">
+    <nav className="sticky top-24" aria-label={ariaConfig.tableOfContents.nav}>
       {/* 外层容器：圆角边框和背景 */}
       <div className="rounded-2xl bg-black/20 border border-white/10 backdrop-blur-lg shadow-lg shadow-black/20 overflow-hidden">
         {/* 顶部高光 */}

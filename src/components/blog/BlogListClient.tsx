@@ -11,6 +11,7 @@ import { useTransition } from "@/contexts/TransitionContext";
 import { useSearch } from "@/contexts/SearchContext";
 import type { PostMeta } from "@/lib/mdx";
 import { CATEGORY_ALL, CATEGORY_ESSAY } from "@/constants/categories";
+import ariaConfig from "@content/pages/aria.json";
 
 // 动画变体配置：单个卡片的浮现动画
 const itemVariants = {
@@ -58,7 +59,7 @@ function LazyBlogCard({ post, onCardClick, setCardRef, isTransitioning }: LazyBl
         onClick={() => onCardClick(post, post.slug)}
         onKeyDown={handleKeyDown}
         className="cursor-pointer focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none rounded-2xl"
-        aria-label={`阅读文章: ${post.title}`}
+        aria-label={ariaConfig.blogList.readPost.replace('{title}', post.title)}
       >
         <BlogCardContent
           ref={(el) => setCardRef(post.slug, el)}

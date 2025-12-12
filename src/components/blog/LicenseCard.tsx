@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { ShieldCheck, Copy, Check, X, Link as LinkIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import ariaConfig from "@content/pages/aria.json";
 
 interface LicenseConfig {
   title: string;
@@ -95,7 +96,7 @@ export function LicenseCard({ title, slug, config }: LicenseCardProps) {
             <button
               onClick={copyToClipboard}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 text-xs font-medium text-white transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
-              aria-label="复制文章链接及版权信息"
+              aria-label={ariaConfig.buttons.copyLicense}
             >
               <AnimatePresence mode="wait">
                 {copyState === "success" ? (

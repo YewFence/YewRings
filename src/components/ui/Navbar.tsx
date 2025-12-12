@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { Home, User, BookOpen, Search, ArrowLeft } from "lucide-react";
 import { useSearch } from "@/contexts/SearchContext";
 import { clsx } from "clsx";
+import ariaConfig from "@content/pages/aria.json";
 
 const navItems = [
   { name: "首页", href: "/", icon: Home },
@@ -163,7 +164,7 @@ export const Navbar = () => {
             <Link
               href="/blog"
               className="p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
-              aria-label="返回博客列表"
+              aria-label={ariaConfig.navigation.backToBlogList}
             >
               <ArrowLeft className="w-4 h-4" aria-hidden="true" />
             </Link>
@@ -254,7 +255,7 @@ export const Navbar = () => {
                   ? "bg-white/10 text-white"
                   : "hover:bg-white/10 text-slate-400 hover:text-white"
               )}
-              aria-label="搜索"
+              aria-label={ariaConfig.navigation.search}
               aria-expanded={isSearchOpen}
             >
               <Search className="w-4 h-4" aria-hidden="true" />

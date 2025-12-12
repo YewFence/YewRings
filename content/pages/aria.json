@@ -1,0 +1,19 @@
+{
+  "navigation": {
+    "backToBlogList": "返回博客列表",
+    "search": "搜索"
+  },
+  "tableOfContents": {
+    "nav": "文章目录",
+    "expandSubheadings": "展开 {heading} 的子标题",
+    "collapseSubheadings": "折叠 {heading} 的子标题"
+  },
+  "blogList": {
+    "readPost": "阅读文章: {title}"
+  },
+  "buttons": {
+    "scrollToTop": "回到顶部",
+    "scrollDown": "向下滚动查看更多内容",
+    "copyLicense": "复制文章链接及版权信息"
+  }
+}
