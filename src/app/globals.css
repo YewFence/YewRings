@@ -45,8 +45,8 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  /* 设置基础字体,Inter 或者系统默认 sans */
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* 使用 next/font 优化的 Geist 字体 */
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   overflow-x: hidden;
 }
 

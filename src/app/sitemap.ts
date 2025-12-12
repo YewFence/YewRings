@@ -3,6 +3,9 @@ import { getSortedPostsData } from '@/lib/mdx';
 
 const BASE_URL = 'https://blog.yewyard.cn';
 
+// 静态导出需要此配置
+export const dynamic = "force-static";
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const posts = getSortedPostsData();
 

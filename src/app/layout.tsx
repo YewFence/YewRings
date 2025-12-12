@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { Geist, Geist_Mono } from "next/font/google";
 import { Navbar } from "@/components/ui/Navbar";
 import { TransitionProvider } from "@/contexts/TransitionContext";
 import { SearchProvider } from "@/contexts/SearchContext";
@@ -8,6 +9,18 @@ import { PageTransitionOverlay } from "@/components/ui/PageTransitionOverlay";
 import { LoadingOverlay } from "@/components/ui/LoadingOverlay";
 import { Footer } from "@/components/ui/Footer";
 import { getMetaContent } from "@/lib/content-loader";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 const meta = getMetaContent();
 
@@ -48,7 +61,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="min-h-screen relative selection:bg-pink-500/30 selection:text-pink-200">
         <SearchProvider>
           <TransitionProvider>

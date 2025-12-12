@@ -146,7 +146,6 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             allCategories={allCategories}
             selectedCategory={category}
             isTransitioning={false}
-            currentCategory={category}
             categoryDisplayNames={categoryDisplayNames}
           />
         </div>

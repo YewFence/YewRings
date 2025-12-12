@@ -11,6 +11,7 @@ import {
 } from "@/components/blog/BlogPostContent";
 import { BlogPostGlassCard } from "@/components/blog/BlogPostGlassCard";
 import { LicenseCard } from "@/components/blog/LicenseCard";
+import { MdxImage } from "@/components/mdx/MdxImage";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import rehypeSlug from "rehype-slug";
@@ -20,6 +21,11 @@ import remarkMath from "remark-math";
 import "katex/dist/katex.min.css";
 import type { Metadata } from "next";
 import { getPageContent } from "@/lib/content-loader";
+
+// MDX 自定义组件映射
+const mdxComponents = {
+  img: MdxImage,
+};
 
 // 预生成静态路径 (SSG) - 对SEO非常重要
 export async function generateStaticParams() {
@@ -116,6 +122,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
               <article className="prose prose-invert md:prose-lg max-w-none prose-headings:font-bold prose-a:text-cyan-300 hover:prose-a:text-cyan-200">
                 <MDXRemote
                   source={content}
+                  components={mdxComponents}
                   options={{
                     mdxOptions: {
                       remarkPlugins: [remarkGfm, remarkMath],
