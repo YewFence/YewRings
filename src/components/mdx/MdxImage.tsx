@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { ComponentPropsWithoutRef } from "react";
+import { POST_IMAGE_PUBLIC_PATH } from "@/constants/path";
 
 type MdxImageProps = ComponentPropsWithoutRef<"img">;
 
@@ -17,7 +18,7 @@ export function MdxImage({ src, alt, ...props }: MdxImageProps) {
   // 本地文章图片：不以 http/data:// 开头的相对路径
   // 例如 "hello-world.cover.png" -> "/images/posts/hello-world.cover.png"
   const isPostImage = !isExternal && !src.startsWith("/");
-  const resolvedSrc = isPostImage ? `/images/posts/${src}` : src;
+  const resolvedSrc = isPostImage ? `/${POST_IMAGE_PUBLIC_PATH}/${src}` : src;
 
   if (isExternal) {
     return (

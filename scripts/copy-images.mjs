@@ -1,6 +1,6 @@
 /**
  * 图片复制脚本
- * 将 content/posts/images/ 下的图片复制到 public/images/posts/
+ * 将 content/images/ 下的图片复制到 public/images/posts/
  * 在 dev 和 build 前自动执行
  */
 import { existsSync, mkdirSync, readdirSync, copyFileSync, statSync } from "fs";
@@ -10,8 +10,12 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, "..");
 
-const sourceDir = join(rootDir, "content", "posts", "images");
-const targetDir = join(rootDir, "public", "images", "posts");
+// 动态导入TypeScript文件中的常量
+const pathModule = await import("../src/constants/path.ts");
+const { POST_IMAGE_SOURCE_PATH, POST_IMAGE_PUBLIC_PATH } = pathModule;
+
+const sourceDir = join(rootDir, POST_IMAGE_SOURCE_PATH);
+const targetDir = join(rootDir, "public", POST_IMAGE_PUBLIC_PATH);
 
 // 支持的图片扩展名
 const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".ico", ".avif"];
@@ -56,7 +60,7 @@ function copyImages() {
   }
 
   if (copiedCount > 0) {
-    console.log(`✅ 已复制 ${copiedCount} 张图片到 public/images/posts/`);
+    console.log(`✅ 已复制 ${copiedCount} 张图片到 public/${POST_IMAGE_PUBLIC_PATH}`);
   } else {
     console.log("📷 没有图片需要复制");
   }
