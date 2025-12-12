@@ -13,6 +13,7 @@ import remarkMath from "remark-math";
 import remarkRehype from "remark-rehype";
 import rehypeKatex from "rehype-katex";
 import rehypeStringify from "rehype-stringify";
+import { CATEGORY_ALL, CATEGORY_ESSAY } from "@/constants/categories";
 
 interface CategoryPageProps {
   params: Promise<{
@@ -100,11 +101,11 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   };
 
   // 如果是 essay 分类，使用时间轴布局
-  const isEssayCategory = category.toLowerCase() === 'essay';
+  const isEssayCategory = category.toLowerCase() === CATEGORY_ESSAY;
 
   if (isEssayCategory) {
     // 获取包含完整内容的文章
-    const essayPosts = getPostsWithContent('essay');
+    const essayPosts = getPostsWithContent(CATEGORY_ESSAY);
 
     // 将 Markdown 转换为 HTML
     const processor = unified()
@@ -129,7 +130,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     );
 
     // 所有分类列表（用于子导航栏）
-    const allCategories = ["All", ...categories];
+    const allCategories = [CATEGORY_ALL, ...categories];
 
     return (
       <div className="min-h-screen py-24 px-4 sm:px-8">

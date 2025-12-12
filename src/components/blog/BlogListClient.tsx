@@ -8,6 +8,7 @@ import { ClonedCard, BlogCardContent } from "@/components/blog/ClonedCard";
 import BlogSubNavbar from "@/components/blog/BlogSubNavbar";
 import { useTransition } from "@/contexts/TransitionContext";
 import type { PostMeta } from "@/lib/mdx";
+import { CATEGORY_ALL, CATEGORY_ESSAY } from "@/constants/categories";
 
 // 动画变体配置：容器控制子元素的交错播放
 const containerVariants = {
@@ -101,7 +102,15 @@ export default function BlogListClient({
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const router = useRouter();
 
-  const [selectedCategory, setSelectedCategory] = useState(currentCategory || "All");
+  // 规范化分类值：统一转为小写
+  const normalizeCategory = useCallback((category: string | undefined): string => {
+    if (!category) return "";
+    return category.trim().toLowerCase();
+  }, []);
+
+  const [selectedCategory, setSelectedCategory] = useState(
+    normalizeCategory(currentCategory) || CATEGORY_ALL
+  );
 
   // preparing 阶段完成后（200ms），切换到 navigating 并执行路由跳转
   useEffect(() => {
@@ -122,25 +131,25 @@ export default function BlogListClient({
   const filteredPosts = useMemo(() => {
     const basePosts = providedAllPosts || posts;
 
-    if (selectedCategory === "All") {
+    if (selectedCategory === CATEGORY_ALL) {
       // 在主页的"全部"分类下，排除随笔文章
       if (!currentCategory) {
-        return basePosts.filter(post => post.category?.toLowerCase() !== "essay");
+        return basePosts.filter(post => normalizeCategory(post.category) !== CATEGORY_ESSAY);
       }
       return basePosts;
     }
 
     return basePosts.filter(post =>
-      post.category?.toLowerCase() === selectedCategory.toLowerCase()
+      normalizeCategory(post.category) === selectedCategory
     );
-  }, [providedAllPosts, posts, selectedCategory, currentCategory]);
-  
+  }, [providedAllPosts, posts, selectedCategory, currentCategory, normalizeCategory]);
+
   // 如果提供了currentCategory，则自动选中该分类
   useEffect(() => {
     if (currentCategory) {
-      setSelectedCategory(currentCategory);
+      setSelectedCategory(normalizeCategory(currentCategory));
     }
-  }, [currentCategory]);
+  }, [currentCategory, normalizeCategory]);
 
   // 处理卡片点击
   const handleCardClick = useCallback(
@@ -167,17 +176,18 @@ export default function BlogListClient({
     }
   }, []);
 
-  // 获取所有存在的分类
+  // 获取所有存在的分类（规范化后去重）
   const allCategories = useMemo(() => {
-    const categoriesSet = new Set<string>(["All"]);
-    const postsToUse = providedAllPosts || posts;
-    postsToUse.forEach((post: PostMeta) => {
-      if (post.category) {
-        categoriesSet.add(post.category);
+    const categoriesSet = new Set<string>([CATEGORY_ALL]);
+    const allPostsForCategories = providedAllPosts || posts;
+    allPostsForCategories.forEach((post: PostMeta) => {
+      const normalized = normalizeCategory(post.category);
+      if (normalized) {
+        categoriesSet.add(normalized);
       }
     });
     return Array.from(categoriesSet);
-  }, [posts, providedAllPosts]);
+  }, [posts, providedAllPosts, normalizeCategory]);
 
   return (
     <div className="w-full max-w-5xl mx-auto">

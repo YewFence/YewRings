@@ -3,6 +3,7 @@ import BlogListClient from "@/components/blog/BlogListClient";
 import { BlogPageHeader } from "@/components/blog/BlogPageHeader";
 import { Metadata } from "next";
 import { getPageContent, getPageMetadata, getAllCategoryDisplayNames } from "@/lib/content-loader";
+import { CATEGORY_ESSAY } from "@/constants/categories";
 
 export async function generateMetadata(): Promise<Metadata> {
   return getPageMetadata('blog');
@@ -13,7 +14,7 @@ export default function BlogPage() {
   // 这里的 fetch 是直接读取文件系统，非常快
   const allPosts = getSortedPostsData();
   // 在全部文章页面过滤掉随笔类文章
-  const filteredPosts = allPosts.filter(post => post.category !== 'essay');
+  const filteredPosts = allPosts.filter(post => post.category !== CATEGORY_ESSAY);
   const content = getPageContent('blog');
   const categoryDisplayNames = getAllCategoryDisplayNames();
 

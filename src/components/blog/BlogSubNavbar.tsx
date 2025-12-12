@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { CATEGORY_ALL } from "@/constants/categories";
 
 interface BlogSubNavbarProps {
   allCategories: string[];
@@ -28,8 +29,9 @@ export default function BlogSubNavbar({
     >
       {allCategories.map(category => {
         const isActive = selectedCategory === category;
-        const href = category === "All" ? "/blog" : `/blog/category/${category.toLowerCase()}`;
-        
+        // category 已经是规范化后的小写值
+        const href = category === CATEGORY_ALL ? "/blog" : `/blog/category/${category}`;
+
         // 获取显示名称：优先使用categoryDisplayNames，否则使用默认格式化
         const displayName = categoryDisplayNames[category] || category.charAt(0).toUpperCase() + category.slice(1);
         

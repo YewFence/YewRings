@@ -75,7 +75,9 @@ export function getAllCategoryDisplayNames(): Record<string, string> {
     const result: Record<string, string> = {};
     for (const [key, config] of Object.entries(categories)) {
       const categoryConfig = config as { name: string; title: string; description: string[] };
-      result[key] = categoryConfig.name;
+      if (categoryConfig?.name){
+        result[key] = categoryConfig.name;
+      }
     }
     
     return result;
