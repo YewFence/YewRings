@@ -118,20 +118,29 @@ export default function BlogListClient({
     }
   }, [phase, targetSlug, router, setPhase]);
 
-  // 分类过滤逻辑
-  const filteredPosts = posts.filter(post => {
+  // 分类过滤逻辑 - 基于完整文章列表进行过滤
+  const filteredPosts = useMemo(() => {
+    const basePosts = providedAllPosts || posts;
+
     if (selectedCategory === "All") {
-      return true;
+      // 在主页的"全部"分类下，排除随笔文章
+      if (!currentCategory) {
+        return basePosts.filter(post => post.category?.toLowerCase() !== "随笔");
+      }
+      return basePosts;
     }
-    return post.category === selectedCategory;
-  });
+
+    return basePosts.filter(post =>
+      post.category?.toLowerCase() === selectedCategory.toLowerCase()
+    );
+  }, [providedAllPosts, posts, selectedCategory, currentCategory]);
   
   // 如果提供了currentCategory，则自动选中该分类
   useEffect(() => {
-    if (currentCategory && currentCategory !== selectedCategory) {
+    if (currentCategory) {
       setSelectedCategory(currentCategory);
     }
-  }, [currentCategory, selectedCategory]);
+  }, [currentCategory]);
 
   // 处理卡片点击
   const handleCardClick = useCallback(
