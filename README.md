@@ -78,7 +78,7 @@ pnpm install
 
 | 命令 | 描述 |
 |------|------|
-| `pnpm dev` | 启动本地开发服务器 (http://localhost:3000) |
+| `pnpm dev` | 启动本地开发服务器 (`http://localhost:3000`) |
 | `pnpm build` | 构建生产版本 (默认静态导出至 `out/` 或 Standalone) |
 | `pnpm build:test` | **构建包含测试文章的版本** (设置 `INCLUDE_TEST_POSTS=true`) |
 | `pnpm lint` | 代码质量检查 |

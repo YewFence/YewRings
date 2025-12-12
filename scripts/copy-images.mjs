@@ -3,16 +3,18 @@
  * 将 content/images/ 下的图片复制到 public/images/posts/
  * 在 dev 和 build 前自动执行
  */
-import { existsSync, mkdirSync, readdirSync, copyFileSync, statSync } from "fs";
+import { existsSync, mkdirSync, readdirSync, copyFileSync, statSync, readFileSync } from "fs";
 import { join, dirname, extname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, "..");
 
-// 动态导入TypeScript文件中的常量
-const pathModule = await import("../src/constants/path.ts");
-const { POST_IMAGE_SOURCE_PATH, POST_IMAGE_PUBLIC_PATH } = pathModule;
+// 读取 JSON 配置文件
+const pathsConfigPath = join(rootDir, "src/constants/paths.json");
+const pathsConfig = JSON.parse(readFileSync(pathsConfigPath, "utf-8"));
+
+const { POST_IMAGE_SOURCE_PATH, POST_IMAGE_PUBLIC_PATH } = pathsConfig;
 
 const sourceDir = join(rootDir, POST_IMAGE_SOURCE_PATH);
 const targetDir = join(rootDir, "public", POST_IMAGE_PUBLIC_PATH);

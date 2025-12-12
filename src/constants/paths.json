@@ -1,0 +1,4 @@
+{
+  "POST_IMAGE_SOURCE_PATH": "content/images",
+  "POST_IMAGE_PUBLIC_PATH": "images/posts"
+}
