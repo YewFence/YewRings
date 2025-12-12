@@ -10,6 +10,73 @@ import type { Node } from 'unist';
 const postsDirectory = path.join(process.cwd(), 'content/posts');
 const metaFilePath = path.join(process.cwd(), 'content/meta.json');
 
+// 文章文件信息
+interface PostFile {
+  filePath: string;              // 完整文件路径
+  slug: string;                  // 文件名（不含扩展名）
+  category: string | undefined;  // 从文件夹名推导的分类
+}
+
+// 模块级缓存，避免重复扫描目录
+let postFilesCache: PostFile[] | null = null;
+
+/**
+ * 递归扫描目录获取所有 MDX 文章文件
+ * 结果会被缓存，同一进程内后续调用直接返回缓存
+ * @returns 所有文章文件信息数组
+ */
+function getAllPostFiles(): PostFile[] {
+  if (postFilesCache !== null) {
+    return postFilesCache;
+  }
+
+  const results: PostFile[] = [];
+
+  function scanDirectory(dirPath: string, category?: string) {
+    if (!fs.existsSync(dirPath)) return;
+
+    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = path.join(dirPath, entry.name);
+
+      if (entry.isDirectory()) {
+        // 递归扫描子目录，子目录名作为分类（统一转小写）
+        scanDirectory(fullPath, entry.name.toLowerCase());
+      } else if (entry.isFile() && entry.name.endsWith('.mdx')) {
+        results.push({
+          filePath: fullPath,
+          slug: entry.name.replace(/\.mdx$/, ''),
+          category,  // 来自文件夹名，根目录文章为 undefined
+        });
+      }
+    }
+  }
+
+  scanDirectory(postsDirectory);
+
+  // 生产环境过滤测试文章：test 分类 或 文件名以 test 开头
+  if (process.env.NODE_ENV === 'production') {
+    postFilesCache = results.filter((post) =>
+      post.category !== 'test' && !post.slug.startsWith('test')
+    );
+    return postFilesCache;
+  }
+
+  postFilesCache = results;
+  return results;
+}
+
+/**
+ * 根据 slug 查找文章文件路径
+ * @param slug 文章 slug
+ * @returns 文章文件信息，未找到返回 null
+ */
+function findPostFile(slug: string): PostFile | null {
+  const postFiles = getAllPostFiles();
+  return postFiles.find((pf) => pf.slug === slug) || null;
+}
+
 type DefaultMeta = {
   author?: string;
 };
@@ -35,8 +102,11 @@ export type PostMeta = {
   slug: string;
   title: string;
   date: string;
+  time?: string; // 文章时间 (HH:mm 格式)
+  updatedAt?: string; // 文章更新日期
   description: string;
   author?: string;
+  category?: string;
 };
 
 export type Heading = {
@@ -54,6 +124,47 @@ interface TextNode extends Node {
 interface HeadingNode extends Node {
   depth: number;
   children: TextNode[];
+}
+
+/**
+ * 处理文章的时间字段
+ * @param dataTime frontmatter 中的 time 值
+ * @param filePath 文件路径（用于获取文件修改时间）
+ * @returns 格式化后的时间字符串，或 undefined
+ */
+function resolveTime(dataTime: string | undefined, filePath: string): string | undefined {
+  if (!dataTime) return undefined;
+
+  if (dataTime === 'auto') {
+    const stats = fs.statSync(filePath);
+    const mtime = stats.mtime;
+    return `${String(mtime.getHours()).padStart(2, '0')}:${String(mtime.getMinutes()).padStart(2, '0')}`;
+  }
+
+  return dataTime;
+}
+
+/**
+ * 处理文章的更新日期字段
+ * @param dataUpdated frontmatter 中的 updated 值
+ * @param filePath 文件路径（用于获取文件修改时间）
+ * @param date 文章创建日期（用于比较是否需要显示更新日期）
+ * @returns 更新日期字符串，如果与创建日期相同则返回 undefined
+ */
+function resolveUpdatedAt(
+  dataUpdated: string | undefined,
+  filePath: string,
+  date: string
+): string | undefined {
+  if (!dataUpdated) return undefined;
+
+  const updatedAt =
+    dataUpdated === 'auto'
+      ? fs.statSync(filePath).mtime.toISOString().split('T')[0]
+      : dataUpdated;
+
+  // 如果修改日期和创建日期相同，则不返回 updatedAt
+  return updatedAt !== date ? updatedAt : undefined;
 }
 
 /**
@@ -88,44 +199,38 @@ function extractHeadings(content: string): Heading[] {
 
 
 export function getSortedPostsData(): PostMeta[] {
-  // 如果目录不存在，防止报错
-  if (!fs.existsSync(postsDirectory)) {
-    return [];
-  }
-  
-  const fileNames = fs.readdirSync(postsDirectory);
-  
-  // 过滤文件：
-  // 1. 必须是 .mdx 结尾
-  // 2. 在生产环境中，过滤掉以 'test' 开头的文件
-  const filteredFileNames = fileNames.filter((fileName) => {
-    if (!fileName.endsWith('.mdx')) return false;
-    
-    if (process.env.NODE_ENV === 'production' && fileName.startsWith('test')) {
-      return false;
-    }
-    
-    return true;
-  });
+  const postFiles = getAllPostFiles();
 
-  const allPostsData = filteredFileNames.map((fileName) => {
-    const slug = fileName.replace(/\.mdx$/, '');
-    const fullPath = path.join(postsDirectory, fileName);
-    const fileContents = fs.readFileSync(fullPath, 'utf8');
+  const allPostsData = postFiles.map(({ filePath, slug, category: folderCategory }) => {
+    const fileContents = fs.readFileSync(filePath, 'utf8');
     const { data } = matter(fileContents);
 
-    return {
+    const postData: PostMeta = {
       slug,
-      ...data,
-    } as PostMeta;
+      date: data.date,
+      title: data.title,
+      description: data.description,
+      author: data.author,
+      // 优先使用文件夹名作为分类，fallback 到 frontmatter
+      category: folderCategory || data.category,
+      time: resolveTime(data.time, filePath),
+      updatedAt: resolveUpdatedAt(data.updated, filePath, data.date),
+    };
+
+    return postData;
   });
 
   return allPostsData.sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 
 export function getPostData(slug: string) {
-  const fullPath = path.join(postsDirectory, `${slug}.mdx`);
-  const fileContents = fs.readFileSync(fullPath, 'utf8');
+  const postFile = findPostFile(slug);
+  if (!postFile) {
+    throw new Error(`Post not found: ${slug}`);
+  }
+
+  const { filePath, category: folderCategory } = postFile;
+  const fileContents = fs.readFileSync(filePath, 'utf8');
   const { content, data } = matter(fileContents);
   const defaultMeta = getDefaultMeta();
 
@@ -134,9 +239,67 @@ export function getPostData(slug: string) {
   // 如果文章没有指定 author，则使用默认配置
   const author = data.author || defaultMeta.author || '';
 
+  const meta: Omit<PostMeta, 'slug'> = {
+    date: data.date,
+    title: data.title,
+    description: data.description,
+    // 优先使用文件夹名作为分类，fallback 到 frontmatter
+    category: folderCategory || data.category,
+    author,
+    time: resolveTime(data.time, filePath),
+    updatedAt: resolveUpdatedAt(data.updated, filePath, data.date),
+  };
+
   return {
     content,
-    meta: { ...data, author } as Omit<PostMeta, 'slug'>,
+    meta,
     headings,
   };
+}
+
+// 包含完整内容的文章类型
+export type PostWithContent = PostMeta & {
+  content: string;
+};
+
+/**
+ * 获取指定分类的文章列表（包含完整 MDX 内容）
+ * 用于随笔页面等需要直接展示内容的场景
+ * @param category 文章分类
+ * @returns 包含完整内容的文章数组，按日期+时间降序排列
+ */
+export function getPostsWithContent(category?: string): PostWithContent[] {
+  const postFiles = getAllPostFiles();
+
+  const posts = postFiles.map(({ filePath, slug, category: folderCategory }) => {
+    const fileContents = fs.readFileSync(filePath, 'utf8');
+    const { content, data } = matter(fileContents);
+
+    const post: PostWithContent = {
+      slug,
+      date: data.date,
+      title: data.title || '', // 标题可为空
+      description: data.description || '',
+      author: data.author,
+      // 优先使用文件夹名作为分类，fallback 到 frontmatter
+      category: folderCategory || data.category,
+      content,
+      time: resolveTime(data.time, filePath),
+      updatedAt: resolveUpdatedAt(data.updated, filePath, data.date),
+    };
+
+    return post;
+  });
+
+  // 按分类过滤
+  const filteredPosts = category
+    ? posts.filter((post) => post.category?.toLowerCase() === category.toLowerCase())
+    : posts;
+
+  // 按日期+时间降序排列
+  return filteredPosts.sort((a, b) => {
+    const dateA = `${a.date} ${a.time || '00:00'}`;
+    const dateB = `${b.date} ${b.time || '00:00'}`;
+    return dateB.localeCompare(dateA);
+  });
 }

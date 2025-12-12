@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { ShieldCheck, Copy, Check, Link as LinkIcon } from "lucide-react";
+import { ShieldCheck, Copy, Check, X, Link as LinkIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import ariaConfig from "@content/pages/aria.json";
 
 interface LicenseConfig {
   title: string;
@@ -18,6 +19,7 @@ interface LicenseConfig {
   reprint_text_suffix: string;
   copy_button_text: string;
   copied_button_text: string;
+  copy_error_text: string;
   copy_suffix: string;
 }
 
@@ -28,24 +30,23 @@ interface LicenseCardProps {
 }
 
 export function LicenseCard({ title, slug, config }: LicenseCardProps) {
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState<"idle" | "success" | "error">("idle");
   const [url, setUrl] = useState("");
 
   useEffect(() => {
     // 在客户端获取完整的 URL
-    if (typeof window !== "undefined") {
-      setUrl(window.location.origin + `/blog/${slug}`);
-    }
+    setUrl(window.location.origin + `/blog/${slug}`);
   }, [slug]);
 
   const copyToClipboard = async () => {
     try {
       const textToCopy = `${title}\n${url}\n${config.copy_suffix}`;
       await navigator.clipboard.writeText(textToCopy);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
+      setCopyState("success");
+      setTimeout(() => setCopyState("idle"), 2000);
+    } catch {
+      setCopyState("error");
+      setTimeout(() => setCopyState("idle"), 2000);
     }
   };
 
@@ -59,7 +60,7 @@ export function LicenseCard({ title, slug, config }: LicenseCardProps) {
         <div className="flex flex-col gap-4">
           {/* 头部：图标和许可名称 */}
           <div className="flex items-center gap-3 text-pink-200">
-            <ShieldCheck className="w-6 h-6" />
+            <ShieldCheck className="w-6 h-6" aria-hidden="true" />
             <h3 className="font-bold text-lg">{config.title}</h3>
           </div>
 
@@ -71,7 +72,7 @@ export function LicenseCard({ title, slug, config }: LicenseCardProps) {
                 href={config.link_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-pink-400 hover:text-pink-300 font-semibold underline decoration-pink-400/30 underline-offset-2 transition-colors"
+                className="text-pink-400 hover:text-pink-300 font-semibold underline decoration-pink-400/30 underline-offset-2 transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none rounded"
               >
                 {config.link_text}
               </a>
@@ -88,17 +89,17 @@ export function LicenseCard({ title, slug, config }: LicenseCardProps) {
 
           {/* 链接复制区域 */}
           <div className="flex items-center gap-2 p-2 rounded-lg bg-black/20 border border-white/5 mt-2">
-             <LinkIcon className="w-4 h-4 text-slate-400 ml-2 shrink-0" />
+             <LinkIcon className="w-4 h-4 text-slate-400 ml-2 shrink-0" aria-hidden="true" />
             <code className="flex-1 text-xs text-slate-300 truncate font-mono select-all">
               {url || `.../blog/${slug}`}
             </code>
             <button
               onClick={copyToClipboard}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 text-xs font-medium text-white transition-colors"
-              title="复制文章链接及版权信息"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 text-xs font-medium text-white transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
+              aria-label={ariaConfig.buttons.copyLicense}
             >
               <AnimatePresence mode="wait">
-                {copied ? (
+                {copyState === "success" ? (
                   <motion.span
                     key="check"
                     initial={{ opacity: 0, scale: 0.8 }}
@@ -108,6 +109,17 @@ export function LicenseCard({ title, slug, config }: LicenseCardProps) {
                   >
                     <Check className="w-3.5 h-3.5" />
                     {config.copied_button_text}
+                  </motion.span>
+                ) : copyState === "error" ? (
+                  <motion.span
+                    key="error"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    className="flex items-center gap-1.5 text-red-400"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    {config.copy_error_text}
                   </motion.span>
                 ) : (
                   <motion.span

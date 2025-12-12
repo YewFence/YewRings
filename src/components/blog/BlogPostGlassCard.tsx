@@ -21,9 +21,9 @@ export function BlogPostGlassCard({ children, className }: BlogPostGlassCardProp
   // 注册目标位置
   useEffect(() => {
     if (cardRef.current && transition?.phase === "navigating") {
-            const rect = cardRef.current.getBoundingClientRect();
-            transition.setTargetRect(rect);
-          }
+      const rect = cardRef.current.getBoundingClientRect();
+      transition.setTargetRect(rect);
+    }
   }, [transition?.phase, transition?.setTargetRect]);
 
   // 在过渡期间隐藏 GlassCard，让占位卡片显示

@@ -11,6 +11,7 @@ import {
 } from "@/components/blog/BlogPostContent";
 import { BlogPostGlassCard } from "@/components/blog/BlogPostGlassCard";
 import { LicenseCard } from "@/components/blog/LicenseCard";
+import { MdxImage } from "@/components/mdx/MdxImage";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import rehypeSlug from "rehype-slug";
@@ -20,6 +21,11 @@ import remarkMath from "remark-math";
 import "katex/dist/katex.min.css";
 import type { Metadata } from "next";
 import { getPageContent } from "@/lib/content-loader";
+
+// MDX 自定义组件映射
+const mdxComponents = {
+  img: MdxImage,
+};
 
 // 预生成静态路径 (SSG) - 对SEO非常重要
 export async function generateStaticParams() {
@@ -53,14 +59,42 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
+const BASE_URL = 'https://blog.yewyard.cn';
+
 export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const { content, meta, headings } = getPostData(slug);
   const pageContent = getPageContent('blog');
   const postPageContent = getPageContent('post'); // Load post.json content
 
+  // JSON-LD 结构化数据
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: meta.title,
+    description: meta.description,
+    datePublished: meta.date,
+    dateModified: meta.updatedAt || meta.date,
+    author: meta.author
+      ? {
+          '@type': 'Person',
+          name: meta.author,
+        }
+      : undefined,
+    url: `${BASE_URL}/blog/${slug}`,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${BASE_URL}/blog/${slug}`,
+    },
+  };
+
   return (
     <div className="max-w-6xl mx-auto px-2 sm:px-4 lg:px-8 pb-20">
+      {/* JSON-LD 结构化数据 */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="lg:grid lg:grid-cols-4 lg:gap-12">
         {/* 左侧 TOC (仅在 lg 及以上屏幕显示) */}
         <BlogPostSidebar>
@@ -80,7 +114,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           </BlogPostBackButton>
 
           {/* 头部信息 */}
-          <BlogPostHeader title={meta.title} description={meta.description} date={meta.date} author={meta.author} />
+          <BlogPostHeader title={meta.title} description={meta.description} date={meta.date} updatedAt={meta.updatedAt} author={meta.author} />
 
           {/* 文章正文容器 */}
           <BlogPostGlassCard className="p-4 sm:p-8 md:p-12">
@@ -88,6 +122,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
               <article className="prose prose-invert md:prose-lg max-w-none prose-headings:font-bold prose-a:text-cyan-300 hover:prose-a:text-cyan-200">
                 <MDXRemote
                   source={content}
+                  components={mdxComponents}
                   options={{
                     mdxOptions: {
                       remarkPlugins: [remarkGfm, remarkMath],

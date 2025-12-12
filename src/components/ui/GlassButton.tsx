@@ -32,6 +32,8 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
         "relative group flex items-center justify-center gap-2 overflow-hidden rounded-full font-medium transition-all duration-300",
         // 基础玻璃质感
         "backdrop-blur-xl border shadow-lg",
+        // 焦点样式
+        "focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 focus-visible:outline-none",
         // 尺寸变体
         size === "sm" && "px-4 py-2 text-sm",
         size === "md" && "px-6 py-3 text-base",
@@ -48,7 +50,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
       <div className={cn(
         "absolute inset-0 -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500",
         isPrimary 
-          ? "bg-llinear-to-r from-cyan-400/20 to-blue-500/20 blur-md"
+          ? "bg-linear-to-r from-cyan-400/20 to-blue-500/20 blur-md"
           : "bg-linear-to-r from-white/10 to-transparent"
       )} />
 

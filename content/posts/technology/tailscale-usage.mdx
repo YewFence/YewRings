@@ -1,7 +1,9 @@
 ---
 title: "Tailscale 使用指南：轻松打造你的个人安全网络"
 date: "2025-12-02"
+updated: "2025-12-08"
 description: "Tailscale 是一款简单易用的 VPN 工具，可以轻松地把你的所有设备连接成一个安全的私有网络。本文将介绍 Tailscale 的基本概念和实用场景，帮助您快速上手并利用它简化网络连接。"
+category: "technology"
 ---
 
 你是否遇到过这些烦恼？
@@ -113,6 +115,9 @@ tailscale serve --bg --set-path / http://localhost:8080
 ### 5. Sidecar 模式：巧妙实现“泛域名”解析
 Tailscale Serve 虽然好用，但目前不支持泛域名解析（例如 `*.device.user-name.ts.net`）。这意味着如果你在一台服务器上部署了多个 Docker 服务，无法直接通过不同的子域名区分访问。非常可惜
 不过，我们可以利用 Docker 的 Sidecar 模式来“取巧”。通过在同一台宿主机上运行多个 Tailscale 容器实例（Sidecar），每个实例都可以拥有独立的设备名和 Magic DNS 记录。这样，你就可以为不同的服务分配不同的 Tailscale 域名，变相实现了类似泛域名解析的效果，让服务访问更加优雅。
+> 注意：这种方法会增加一些资源开销，因为每个 Sidecar 容器都需要运行一个完整的 Tailscale 实例。但对于个人用户来说，这种开销通常是可以接受的，尤其是当你需要多个独立域名来访问不同服务时。
+> 如果你认为这种方法过于复杂，或者资源有限，也可以考虑使用反向代理（如 Caddy、Nginx）结合单一的 Tailscale 实例来实现类似的效果，虽然配置上会稍微复杂一些，但同样能够满足大部分需求。注意，该方法要求你拥有一个公网域名，并且需要在 DNS 提供商处配置指向对应设备 Tailscale 内网 ip 的解析记录。
+> 对于将服务暴露在公网的安全性问题，可以令容器只监听在 Tailscale 的虚拟网卡上，从而确保只有你的 Tailnet 设备才能访问这些服务，进一步提升安全性。
 
 #### 示例：为 SearXNG 配置 Tailscale Sidecar (Docker)
 

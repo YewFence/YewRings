@@ -1,10 +1,26 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { Geist, Geist_Mono } from "next/font/google";
 import { Navbar } from "@/components/ui/Navbar";
 import { TransitionProvider } from "@/contexts/TransitionContext";
+import { SearchProvider } from "@/contexts/SearchContext";
 import { PageTransitionOverlay } from "@/components/ui/PageTransitionOverlay";
+import { LoadingOverlay } from "@/components/ui/LoadingOverlay";
 import { Footer } from "@/components/ui/Footer";
 import { getMetaContent } from "@/lib/content-loader";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 const meta = getMetaContent();
 
@@ -45,27 +61,34 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="min-h-screen relative selection:bg-pink-500/30 selection:text-pink-200">
-        <TransitionProvider>
-          {/* 1. 静态液态背景层 */}
-          <div className="fixed inset-0 bg-slate-900 bg-liquid-mesh -z-20" />
+        <SearchProvider>
+          <TransitionProvider>
+            {/* 1. 静态液态背景层 */}
+            <div className="fixed inset-0 bg-slate-900 bg-liquid-mesh -z-20" />
 
-          {/* 2. 噪点层 (覆盖在背景之上，但内容之下) */}
-          <div className="noise-overlay" />
+            {/* 2. 噪点层 (覆盖在背景之上，但内容之下) */}
+            <div className="noise-overlay" />
 
-          {/* 导航栏 */}
-          <Navbar />
+            {/* 导航栏 */}
+            <Navbar />
 
-          {/* 3. 主要内容 */}
-          <main className="relative z-10 pt-24 px-4 min-h-[calc(100vh-200px)]">{children}</main>
+            {/* 3. 主要内容 */}
+            <main className="relative z-10 pt-24 px-4 min-h-[calc(100vh-200px)]">{children}</main>
 
-          {/* 页脚 */}
-          <Footer siteName={meta.site.name} />
+            {/* 页脚 */}
+            <Footer siteName={meta.site.name} />
 
-          {/* 4. 页面过渡动画覆盖层 */}
-          <PageTransitionOverlay />
-        </TransitionProvider>
+            {/* 4. 页面过渡动画覆盖层 */}
+            <PageTransitionOverlay />
+
+            {/* 5. 路由切换 Loading 覆盖层 */}
+            <Suspense fallback={null}>
+              <LoadingOverlay />
+            </Suspense>
+          </TransitionProvider>
+        </SearchProvider>
       </body>
     </html>
   );

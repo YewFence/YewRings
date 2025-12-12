@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ArrowUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { clsx } from "clsx";
+import ariaConfig from "@content/pages/aria.json";
 
 export const ScrollToTopButton = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -67,18 +68,20 @@ export const ScrollToTopButton = () => {
             "shadow-2xl shadow-black/50",
             "flex items-center justify-center",
             "overflow-hidden", // 隐藏内部溢出的填充元素
-            "group" // 用于 hover 效果
+            "group", // 用于 hover 效果
+            "focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
           )}
-          aria-label="回到顶部"
+          aria-label={ariaConfig.buttons.scrollToTop}
         >
           {/* 进度填充层 */}
           <div
             className="absolute bottom-0 left-0 w-full bg-linear-to-t from-cyan-500/50 to-pink-500/50"
             style={{ height: `${scrollProgress}%` }}
+            aria-hidden="true"
           />
 
           {/* 图标层 */}
-          <ArrowUp className="relative z-10 w-6 h-6 text-slate-300 transition-transform group-hover:scale-110 group-hover:-translate-y-0.5" />
+          <ArrowUp className="relative z-10 w-6 h-6 text-slate-300 transition-transform group-hover:scale-110 group-hover:-translate-y-0.5" aria-hidden="true" />
         </motion.button>
       )}
     </AnimatePresence>

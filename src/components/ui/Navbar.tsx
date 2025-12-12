@@ -3,9 +3,11 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { Home, User, BookOpen, Command, ArrowLeft } from "lucide-react";
+import { motion } from "framer-motion";
+import { Home, User, BookOpen, Search, ArrowLeft } from "lucide-react";
+import { useSearch } from "@/contexts/SearchContext";
 import { clsx } from "clsx";
+import ariaConfig from "@content/pages/aria.json";
 
 const navItems = [
   { name: "首页", href: "/", icon: Home },
@@ -24,9 +26,8 @@ const COMPACT_SAVING = 120;
 
 export const Navbar = () => {
   const pathname = usePathname();
+  const { toggleSearch, isSearchOpen } = useSearch();
   const [showBackButton, setShowBackButton] = useState(false);
-  const prevPathnameRef = useRef(pathname);
-  const [skipAnimation, setSkipAnimation] = useState(false);
   const [articleTitle, setArticleTitle] = useState<string | null>(null);
   const [titleMaxWidth, setTitleMaxWidth] = useState<number>(200);
   const [compactMode, setCompactMode] = useState(false); // 新增：紧凑模式状态
@@ -37,9 +38,13 @@ export const Navbar = () => {
   const isArticlePage = pathname.startsWith("/blog/") && pathname !== "/blog";
   const shouldShow = isArticlePage && showBackButton;
 
+  // 判断是否应该显示搜索按钮（只在博客列表页和分类页显示）
+  const showSearchButton = pathname === "/blog" || pathname.startsWith("/blog/category/");
+
   // 从 DOM 获取文章标题
   useEffect(() => {
     if (!isArticlePage) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setArticleTitle(null);
       return;
     }
@@ -108,6 +113,7 @@ export const Navbar = () => {
   // 监听滚动
   useEffect(() => {
     if (!isArticlePage) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowBackButton(false);
       return;
     }
@@ -157,9 +163,10 @@ export const Navbar = () => {
           >
             <Link
               href="/blog"
-              className="p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+              className="p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
+              aria-label={ariaConfig.navigation.backToBlogList}
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-4 h-4" aria-hidden="true" />
             </Link>
             <div className="w-px h-4 bg-white/10 mx-1" />
           </motion.div>
@@ -176,7 +183,7 @@ export const Navbar = () => {
           const showActiveBackground = isActive && !(item.href === "/blog" && shouldShow && articleTitle && !compactMode);
 
           return (
-            <Link key={item.href} href={item.href} className="relative px-4 py-2 group">
+            <Link key={item.href} href={item.href} className="relative px-4 py-2 group rounded-full focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none">
               {showActiveBackground && (
                 <motion.div
                   style={{originY: '0px'}}
@@ -191,9 +198,9 @@ export const Navbar = () => {
                 isActive && showActiveBackground ? "text-white" : "text-slate-400 group-hover:text-slate-200"
               )}>
                 <Icon className="w-4 h-4" />
-                   <span>
-                     {item.name}
-                   </span>
+                <span className="hidden sm:inline">
+                  {item.name}
+                </span>
               </span>
             </Link>
           );
@@ -235,12 +242,26 @@ export const Navbar = () => {
           </div>
         </motion.div>
 
-        {/* 一个装饰性的分割线和功能按钮 */}
-        <div className="w-px h-4 bg-white/10 mx-2" />
-        
-        <button className="p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition-colors">
-          <Command className="w-4 h-4" />
-        </button>
+        {/* 一个装饰性的分割线和功能按钮 - 只在博客列表页和分类页显示 */}
+        {showSearchButton && (
+          <>
+            <div className="w-px h-4 bg-white/10 mx-2" />
+
+            <button
+              onClick={toggleSearch}
+              className={clsx(
+                "p-2 rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none",
+                isSearchOpen
+                  ? "bg-white/10 text-white"
+                  : "hover:bg-white/10 text-slate-400 hover:text-white"
+              )}
+              aria-label={ariaConfig.navigation.search}
+              aria-expanded={isSearchOpen}
+            >
+              <Search className="w-4 h-4" aria-hidden="true" />
+            </button>
+          </>
+        )}
       </motion.nav>
     </motion.div>
   );

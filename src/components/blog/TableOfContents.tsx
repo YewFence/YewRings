@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Heading } from '@/lib/mdx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
 import { ChevronDown } from 'lucide-react';
+import ariaConfig from "@content/pages/aria.json";
 
 interface TOCProps {
   headings: Heading[];
@@ -70,7 +71,7 @@ export const TableOfContents = ({ headings }: TOCProps) => {
   const [showBottomMask, setShowBottomMask] = useState(false);
 
   // 更新折叠状态的函数
-  const updateCollapsed = (slug: string) => {
+  const updateCollapsed = useCallback((slug: string) => {
     const activeParents = getParentHeadings(headings, slug);
     const currentTopLevel = getTopLevelParent(headings, slug);
 
@@ -88,7 +89,7 @@ export const TableOfContents = ({ headings }: TOCProps) => {
       activeParents.forEach((s) => newSet.delete(s));
       return newSet;
     });
-  };
+  }, [headings]);
 
   // 滚动 TOC 容器使活动项可见
   const scrollTocToActiveItem = (slug: string) => {
@@ -124,7 +125,7 @@ export const TableOfContents = ({ headings }: TOCProps) => {
   };
 
   // 监听 TOC 容器滚动，更新遮罩显示状态
-  const updateScrollMasks = () => {
+  const updateScrollMasks = useCallback(() => {
     const el = tocRef.current;
     if (!el) return;
 
@@ -133,16 +134,17 @@ export const TableOfContents = ({ headings }: TOCProps) => {
 
     setShowTopMask(isScrollable && scrollTop > 10);
     setShowBottomMask(isScrollable && scrollTop < scrollHeight - clientHeight - 10);
-  };
+  }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     updateScrollMasks();
     const el = tocRef.current;
     if (el) {
       el.addEventListener('scroll', updateScrollMasks, { passive: true });
       return () => el.removeEventListener('scroll', updateScrollMasks);
     }
-  }, [collapsed]); // 折叠状态变化时重新计算
+  }, [collapsed, updateScrollMasks]); // 折叠状态变化时重新计算
 
   // 当活动标题变化时，滚动 TOC 使其可见
   useEffect(() => {
@@ -229,7 +231,7 @@ export const TableOfContents = ({ headings }: TOCProps) => {
       window.removeEventListener('toc-pause-scroll', handlePauseScroll);
       window.removeEventListener('toc-resume-scroll', handleResumeScroll);
     };
-  }, [headings, activeSlug]);
+  }, [headings, activeSlug, updateCollapsed]);
 
   // 点击导航项时滚动到目标位置
   const scrollToHeading = (slug: string) => {
@@ -305,13 +307,18 @@ export const TableOfContents = ({ headings }: TOCProps) => {
           {childHeadings.length > 0 && (
             <button
               onClick={() => toggleCollapse(heading.slug)}
-              className="p-1 rounded-md hover:bg-white/10 text-slate-500 hover:text-slate-300"
+              className="p-1 rounded-md hover:bg-white/10 text-slate-500 hover:text-slate-300 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
+              aria-expanded={!isCollapsed}
+              aria-label={isCollapsed
+                ? ariaConfig.tableOfContents.expandSubheadings.replace('{heading}', heading.text)
+                : ariaConfig.tableOfContents.collapseSubheadings.replace('{heading}', heading.text)}
             >
               <ChevronDown
                 className={clsx(
                   'w-4 h-4 transition-transform',
                   !isCollapsed && '-rotate-90'
                 )}
+                aria-hidden="true"
               />
             </button>
           )}
@@ -322,10 +329,11 @@ export const TableOfContents = ({ headings }: TOCProps) => {
               scrollToHeading(heading.slug);
             }}
             className={clsx(
-              'relative flex-1 py-1 px-2 text-sm transition-colors rounded-r-md',
+              'relative flex-1 py-1 px-2 text-sm transition-colors rounded-r-md focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none',
               isActive ? 'text-cyan-300' : 'text-slate-400 hover:text-slate-200',
               { 'ml-5': childHeadings.length === 0 } // 对没有子项的进行缩进
             )}
+            aria-current={isActive ? 'location' : undefined}
           >
             {isActive && (
               <motion.div
@@ -362,7 +370,7 @@ export const TableOfContents = ({ headings }: TOCProps) => {
   const topLevelHeadings = headings.filter((h) => h.level === 2);
 
   return (
-    <nav className="sticky top-24">
+    <nav className="sticky top-24" aria-label={ariaConfig.tableOfContents.nav}>
       {/* 外层容器：圆角边框和背景 */}
       <div className="rounded-2xl bg-black/20 border border-white/10 backdrop-blur-lg shadow-lg shadow-black/20 overflow-hidden">
         {/* 顶部高光 */}

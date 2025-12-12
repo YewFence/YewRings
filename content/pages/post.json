@@ -12,6 +12,7 @@
     "reprint_text_suffix": "。",
     "copy_button_text": "复制",
     "copied_button_text": "已复制",
+    "copy_error_text": "复制失败，请手动复制",
     "copy_suffix": "(License: CC BY 4.0)"
   }
 }
