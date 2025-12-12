@@ -31,9 +31,7 @@ export default function BlogSubNavbar({
         const href = category === "All" ? "/blog" : `/blog/category/${category.toLowerCase()}`;
         
         // 获取显示名称：优先使用categoryDisplayNames，否则使用默认格式化
-        const displayName = category === "All" 
-          ? categoryDisplayNames[category] || "All"
-          : categoryDisplayNames[category] || category.charAt(0).toUpperCase() + category.slice(1);
+        const displayName = categoryDisplayNames[category] || category.charAt(0).toUpperCase() + category.slice(1);
         
         return (
           <Link

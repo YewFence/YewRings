@@ -53,19 +53,6 @@ export function getCategoryConfig(category: string): { name: string; title: stri
       return categories[lowerCategory];
     }
     
-    // 尝试处理单复数（如果分类是单数，但配置中是复数）
-    if (category.endsWith('y')) {
-      const pluralCategory = category.slice(0, -1) + 'ies';
-      if (categories[pluralCategory]) {
-        return categories[pluralCategory];
-      }
-    } else if (!category.endsWith('s')) {
-      const pluralCategory = category + 's';
-      if (categories[pluralCategory]) {
-        return categories[pluralCategory];
-      }
-    }
-    
     return null;
   } catch {
     return null;
