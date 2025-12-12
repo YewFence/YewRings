@@ -117,28 +117,41 @@ export function LoadingOverlay() {
   const [isLoading, setIsLoading] = useState(false);
   const [shouldShow, setShouldShow] = useState(false);
   const prevPathRef = useRef(pathname);
-  const showTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 监听路由开始变化（通过 link 点击事件）
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
+      if (e.defaultPrevented) return;
+      if (e.button !== 0) return; // 仅左键
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; // 新开标签/窗口等
       const target = e.target as HTMLElement;
-      const link = target.closest('a');
-      if (link && link.href && link.href.startsWith(window.location.origin)) {
-        const url = new URL(link.href);
-        // 如果是不同的路径，开始 loading
-        if (url.pathname !== pathname) {
-          setIsLoading(true);
-          // 延迟 500ms 后才显示
-          showTimerRef.current = setTimeout(() => {
-            setShouldShow(true);
-          }, 500);
-        }
+      const link = target.closest('a') as HTMLAnchorElement | null;
+      if (!link) return;
+      if (link.target === '_blank') return;
+      if (link.hasAttribute('download')) return;
+      if (!link.href || !link.href.startsWith(window.location.origin)) return;
+
+      const url = new URL(link.href);
+      // 如果是不同的路径/查询参数，开始 loading（忽略纯 hash 跳转）
+      const isSamePathAndSearch =
+        url.pathname === window.location.pathname && url.search === window.location.search;
+      if (!isSamePathAndSearch) {
+        setIsLoading(true);
+        if (showTimerRef.current) clearTimeout(showTimerRef.current);
+        // 延迟 500ms 后才显示
+        showTimerRef.current = setTimeout(() => {
+          setShouldShow(true);
+        }, 500);
       }
     };
 
     document.addEventListener('click', handleClick);
-    return () => document.removeEventListener('click', handleClick);
+    return () => {
+      document.removeEventListener('click', handleClick);
+      if (showTimerRef.current) clearTimeout(showTimerRef.current);
+      showTimerRef.current = null;
+    };
   }, [pathname]);
 
   // 路由完成后隐藏 loading
