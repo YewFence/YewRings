@@ -4,7 +4,7 @@
  * 在 dev 和 build 前自动执行
  */
 import { existsSync, mkdirSync, readdirSync, copyFileSync, statSync } from "fs";
-import { join, dirname } from "path";
+import { join, dirname, extname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -37,14 +37,22 @@ function copyImages() {
     const targetPath = join(targetDir, file);
 
     // 跳过目录和非图片文件
-    if (statSync(sourcePath).isDirectory()) continue;
-
-    const ext = file.toLowerCase().slice(file.lastIndexOf("."));
+    try {
+      if (statSync(sourcePath).isDirectory()) continue;
+    } catch (err) {
+      console.warn(`无法访问文件 ${file}：`, err.message);
+      continue;
+    }
+    const ext = extname(file).toLowerCase();
     if (!imageExtensions.includes(ext)) continue;
 
     // 复制文件
-    copyFileSync(sourcePath, targetPath);
-    copiedCount++;
+    try {
+      copyFileSync(sourcePath, targetPath);
+      copiedCount++;
+    } catch (err) {
+      console.warn(`复制文件 ${file} 失败：`, err.message);
+    }
   }
 
   if (copiedCount > 0) {
