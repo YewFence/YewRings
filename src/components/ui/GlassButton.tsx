@@ -50,7 +50,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
       <div className={cn(
         "absolute inset-0 -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500",
         isPrimary 
-          ? "bg-llinear-to-r from-cyan-400/20 to-blue-500/20 blur-md"
+          ? "bg-linear-to-r from-cyan-400/20 to-blue-500/20 blur-md"
           : "bg-linear-to-r from-white/10 to-transparent"
       )} />
 
