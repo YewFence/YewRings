@@ -41,8 +41,8 @@ function getAllPostFiles(): PostFile[] {
       const fullPath = path.join(dirPath, entry.name);
 
       if (entry.isDirectory()) {
-        // 递归扫描子目录，子目录名作为分类
-        scanDirectory(fullPath, entry.name);
+        // 递归扫描子目录，子目录名作为分类（统一转小写）
+        scanDirectory(fullPath, entry.name.toLowerCase());
       } else if (entry.isFile() && entry.name.endsWith('.mdx')) {
         results.push({
           filePath: fullPath,
