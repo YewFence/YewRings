@@ -82,21 +82,23 @@ interface ClonedCardData {
   rect: DOMRect;
 }
 
-export default function BlogListClient({ 
-  posts, 
+interface BlogListClientProps {
+  posts: PostMeta[];
+  allPosts?: PostMeta[];
+  searchPlaceholder: string;
+  emptyState: string;
+  currentCategory?: string;
+  categoryDisplayNames?: Record<string, string>;
+}
+
+export default function BlogListClient({
+  posts,
   allPosts: providedAllPosts,
-  searchPlaceholder, 
+  searchPlaceholder,
   emptyState,
   currentCategory,
   categoryDisplayNames = {}
-}: { 
-  posts: PostMeta[], 
-  allPosts?: PostMeta[],
-  searchPlaceholder: string, 
-  emptyState: string,
-  currentCategory?: string,
-  categoryDisplayNames?: Record<string, string>
-}) {
+}: BlogListClientProps) {
   const [clonedCard, setClonedCard] = useState<ClonedCardData | null>(null);
   const { isTransitioning, phase, targetSlug, startTransition, setPhase } = useTransition();
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
