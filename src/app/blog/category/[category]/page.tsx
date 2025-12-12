@@ -119,6 +119,21 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       time: post.time,
     }));
 
+    // 构建期断言：数据数量与内容必须一致，否则直接失败
+    if (essayMetas.length !== essayPosts.length) {
+      const metaCount = essayMetas.length;
+      const postCount = essayPosts.length;
+      const slugs = essayMetas.map((m) => m.slug);
+      throw new Error(
+        `构建失败：随笔元信息(${metaCount})与内容(${postCount})数量不一致。slugs=${JSON.stringify(slugs)}`
+      );
+    }
+    // 额外校验：内容必须存在
+    const invalid = essayPosts.filter((p) => !p.content || p.content.trim().length === 0).map((p) => p.slug);
+    if (invalid.length > 0) {
+      throw new Error(`构建失败：以下随笔内容为空或无效：${JSON.stringify(invalid)}`);
+    }
+
     // 所有分类列表（用于子导航栏）
     const allCategories = [CATEGORY_ALL, ...categories];
 
