@@ -2,12 +2,13 @@
 
 import { motion } from "framer-motion";
 import { Calendar, Clock } from "lucide-react";
+import type { ReactNode } from "react";
 
 interface EssayTimelineCardProps {
   title?: string;
   date: string;
   time?: string;
-  htmlContent: string; // 服务端渲染好的 HTML
+  children: ReactNode; // 服务端渲染好的 MDX 内容
   isLeft?: boolean; // 是否在时间轴左侧（桌面端）
 }
 
@@ -15,11 +16,11 @@ export function EssayTimelineCard({
   title,
   date,
   time,
-  htmlContent,
+  children,
   isLeft = false,
 }: EssayTimelineCardProps) {
   // 标题和正文都有时才显示分割线
-  const showDivider = title && htmlContent;
+  const showDivider = title && children;
 
   return (
     <motion.div
@@ -73,11 +74,10 @@ export function EssayTimelineCard({
         </div>
       )}
 
-      {/* MDX 正文内容 - 使用 dangerouslySetInnerHTML 渲染服务端生成的 HTML */}
-      <div
-        className="prose prose-sm prose-invert max-w-none text-sm text-slate-300 prose-headings:text-slate-200 prose-headings:font-medium prose-a:text-cyan-300 hover:prose-a:text-cyan-200 prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5"
-        dangerouslySetInnerHTML={{ __html: htmlContent }}
-      />
+      {/* MDX 正文内容 - 使用 children 渲染服务端生成的内容 */}
+      <div className="prose prose-sm prose-invert max-w-none text-sm text-slate-300 prose-headings:text-slate-200 prose-headings:font-medium prose-a:text-cyan-300 hover:prose-a:text-cyan-200 prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5">
+        {children}
+      </div>
     </motion.div>
   );
 }

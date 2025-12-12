@@ -4,16 +4,20 @@ import { BlogPageHeader } from "@/components/blog/BlogPageHeader";
 import { Metadata } from "next";
 import { getPageContent, getPageMetadata, getCategoryConfig, getAllCategoryDisplayNames } from "@/lib/content-loader";
 import { notFound } from "next/navigation";
-import { EssayPageClient, SerializedEssay } from "@/components/essay/EssayPageClient";
+import { EssayPageClient, EssayMeta } from "@/components/essay/EssayPageClient";
 import BlogSubNavbar from "@/components/blog/BlogSubNavbar";
-import { unified } from "unified";
-import remarkParse from "remark-parse";
+import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
-import remarkRehype from "remark-rehype";
 import rehypeKatex from "rehype-katex";
-import rehypeStringify from "rehype-stringify";
+import { MdxImage } from "@/components/mdx/MdxImage";
 import { CATEGORY_ALL, CATEGORY_ESSAY } from "@/constants/categories";
+import "katex/dist/katex.min.css";
+
+// MDX 自定义组件映射
+const mdxComponents = {
+  img: MdxImage,
+};
 
 interface CategoryPageProps {
   params: Promise<{
@@ -107,27 +111,13 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     // 获取包含完整内容的文章
     const essayPosts = getPostsWithContent(CATEGORY_ESSAY);
 
-    // 将 Markdown 转换为 HTML
-    const processor = unified()
-      .use(remarkParse)
-      .use(remarkGfm)
-      .use(remarkMath)
-      .use(remarkRehype, { allowDangerousHtml: true })
-      .use(rehypeKatex)
-      .use(rehypeStringify, { allowDangerousHtml: true });
-
-    const serializedEssays: SerializedEssay[] = await Promise.all(
-      essayPosts.map(async (post) => {
-        const result = await processor.process(post.content);
-        return {
-          slug: post.slug,
-          title: post.title,
-          date: post.date,
-          time: post.time,
-          htmlContent: String(result),
-        };
-      })
-    );
+    // 提取元数据
+    const essayMetas: EssayMeta[] = essayPosts.map((post) => ({
+      slug: post.slug,
+      title: post.title,
+      date: post.date,
+      time: post.time,
+    }));
 
     // 所有分类列表（用于子导航栏）
     const allCategories = [CATEGORY_ALL, ...categories];
@@ -150,11 +140,25 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           />
         </div>
 
-        {/* 时间轴布局 */}
+        {/* 时间轴布局 - 使用 MDXRemote 渲染每篇随笔 */}
         <EssayPageClient
-          essays={serializedEssays}
+          essayMetas={essayMetas}
           emptyState={modifiedContent.list.emptyState}
-        />
+        >
+          {essayPosts.map((post) => (
+            <MDXRemote
+              key={post.slug}
+              source={post.content}
+              components={mdxComponents}
+              options={{
+                mdxOptions: {
+                  remarkPlugins: [remarkGfm, remarkMath],
+                  rehypePlugins: [rehypeKatex],
+                },
+              }}
+            />
+          ))}
+        </EssayPageClient>
       </div>
     );
   }
