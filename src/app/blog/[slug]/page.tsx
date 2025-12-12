@@ -53,14 +53,42 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
+const BASE_URL = 'https://blog.yewyard.cn';
+
 export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const { content, meta, headings } = getPostData(slug);
   const pageContent = getPageContent('blog');
   const postPageContent = getPageContent('post'); // Load post.json content
 
+  // JSON-LD 结构化数据
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: meta.title,
+    description: meta.description,
+    datePublished: meta.date,
+    dateModified: meta.updatedAt || meta.date,
+    author: meta.author
+      ? {
+          '@type': 'Person',
+          name: meta.author,
+        }
+      : undefined,
+    url: `${BASE_URL}/blog/${slug}`,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${BASE_URL}/blog/${slug}`,
+    },
+  };
+
   return (
     <div className="max-w-6xl mx-auto px-2 sm:px-4 lg:px-8 pb-20">
+      {/* JSON-LD 结构化数据 */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="lg:grid lg:grid-cols-4 lg:gap-12">
         {/* 左侧 TOC (仅在 lg 及以上屏幕显示) */}
         <BlogPostSidebar>
