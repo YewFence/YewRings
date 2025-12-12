@@ -17,11 +17,19 @@ interface PostFile {
   category: string | undefined;  // 从文件夹名推导的分类
 }
 
+// 模块级缓存，避免重复扫描目录
+let postFilesCache: PostFile[] | null = null;
+
 /**
  * 递归扫描目录获取所有 MDX 文章文件
+ * 结果会被缓存，同一进程内后续调用直接返回缓存
  * @returns 所有文章文件信息数组
  */
 function getAllPostFiles(): PostFile[] {
+  if (postFilesCache !== null) {
+    return postFilesCache;
+  }
+
   const results: PostFile[] = [];
 
   function scanDirectory(dirPath: string, category?: string) {
@@ -49,11 +57,13 @@ function getAllPostFiles(): PostFile[] {
 
   // 生产环境过滤测试文章：test 分类 或 文件名以 test 开头
   if (process.env.NODE_ENV === 'production') {
-    return results.filter((post) =>
+    postFilesCache = results.filter((post) =>
       post.category !== 'test' && !post.slug.startsWith('test')
     );
+    return postFilesCache;
   }
 
+  postFilesCache = results;
   return results;
 }
 
