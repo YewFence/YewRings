@@ -43,10 +43,10 @@ function getAllPostFiles(): PostFile[] {
       if (entry.isDirectory()) {
         // 递归扫描子目录，子目录名作为分类（统一转小写）
         scanDirectory(fullPath, entry.name.toLowerCase());
-      } else if (entry.isFile() && entry.name.endsWith('.mdx')) {
+      } else if (entry.isFile() && (entry.name.endsWith('.mdx') || entry.name.endsWith('.md'))) {
         results.push({
           filePath: fullPath,
-          slug: entry.name.replace(/\.mdx$/, ''),
+          slug: entry.name.replace(/\.mdx?$/, ''),
           category,  // 来自文件夹名，根目录文章为 undefined
         });
       }
