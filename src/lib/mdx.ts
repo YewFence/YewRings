@@ -141,6 +141,21 @@ function normalizeDate(date: string | Date): string {
 }
 
 /**
+ * 解析文章日期，支持 fallback 到文件创建时间
+ * @param date frontmatter 中的 date 值
+ * @param filePath 文件路径（用于获取文件创建时间作为 fallback）
+ * @returns 标准化后的日期字符串 (YYYY-MM-DD)
+ */
+function resolveDate(date: string | Date | undefined, filePath: string): string {
+  if (date !== undefined) {
+    return normalizeDate(date);
+  }
+  // fallback: 使用文件创建时间（birthtime）
+  const stats = fs.statSync(filePath);
+  return stats.birthtime.toISOString().split('T')[0];
+}
+
+/**
  * 处理文章的时间字段
  * @param dataTime frontmatter 中的 time 值
  * @param filePath 文件路径（用于获取文件修改时间）
@@ -218,7 +233,7 @@ export function getSortedPostsData(): PostMeta[] {
   const allPostsData = postFiles.map(({ filePath, slug, category: folderCategory }) => {
     const fileContents = fs.readFileSync(filePath, 'utf8');
     const { data } = matter(fileContents);
-    const date = normalizeDate(data.date);
+    const date = resolveDate(data.date, filePath);
 
     const postData: PostMeta = {
       slug,
@@ -248,7 +263,7 @@ export function getPostData(slug: string) {
   const fileContents = fs.readFileSync(filePath, 'utf8');
   const { content, data } = matter(fileContents);
   const defaultMeta = getDefaultMeta();
-  const date = normalizeDate(data.date);
+  const date = resolveDate(data.date, filePath);
 
   const headings = extractHeadings(content);
 
@@ -290,7 +305,7 @@ export function getPostsWithContent(category?: string): PostWithContent[] {
   const posts = postFiles.map(({ filePath, slug, category: folderCategory }) => {
     const fileContents = fs.readFileSync(filePath, 'utf8');
     const { content, data } = matter(fileContents);
-    const date = normalizeDate(data.date);
+    const date = resolveDate(data.date, filePath);
 
     const post: PostWithContent = {
       slug,
