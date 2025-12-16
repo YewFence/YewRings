@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { Heading } from '@/lib/mdx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
@@ -11,21 +11,28 @@ interface TOCProps {
   headings: Heading[];
 }
 
-// 查找当前活动标题所属的顶级标题（level 2）
+// 获取文章中的最小 level（最顶级的标题层级）
+const getMinLevel = (headings: Heading[]): number => {
+  if (headings.length === 0) return 2;
+  return Math.min(...headings.map((h) => h.level));
+};
+
+// 查找当前活动标题所属的顶级标题
 const getTopLevelParent = (
   headings: Heading[],
-  activeSlug: string
+  activeSlug: string,
+  minLevel: number
 ): string | null => {
   const activeIndex = headings.findIndex((h) => h.slug === activeSlug);
   if (activeIndex === -1) return null;
 
   const activeHeading = headings[activeIndex];
-  // 如果自己就是 level 2，返回自己
-  if (activeHeading.level === 2) return activeSlug;
+  // 如果自己就是顶级标题，返回自己
+  if (activeHeading.level === minLevel) return activeSlug;
 
-  // 往前找最近的 level 2
+  // 往前找最近的顶级标题
   for (let i = activeIndex - 1; i >= 0; i--) {
-    if (headings[i].level === 2) {
+    if (headings[i].level === minLevel) {
       return headings[i].slug;
     }
   }
@@ -35,7 +42,8 @@ const getTopLevelParent = (
 // 查找当前活动标题的所有父标题
 const getParentHeadings = (
   headings: Heading[],
-  activeSlug: string
+  activeSlug: string,
+  minLevel: number
 ): Set<string> => {
   const parents = new Set<string>();
   const activeIndex = headings.findIndex((h) => h.slug === activeSlug);
@@ -50,8 +58,8 @@ const getParentHeadings = (
     if (heading.level < currentLevel) {
       parents.add(heading.slug);
       currentLevel = heading.level;
-      // 如果已经找到 level 2，就不用再往上找了
-      if (currentLevel <= 2) break;
+      // 如果已经找到顶级标题，就不用再往上找了
+      if (currentLevel <= minLevel) break;
     }
   }
 
@@ -60,9 +68,11 @@ const getParentHeadings = (
 
 export const TableOfContents = ({ headings }: TOCProps) => {
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
+  // 计算文章中的最小 level（最顶级的标题层级）
+  const minLevel = useMemo(() => getMinLevel(headings), [headings]);
   // 默认折叠所有顶级标题
   const [collapsed, setCollapsed] = useState<Set<string>>(() => {
-    return new Set(headings.filter(h => h.level === 2).map(h => h.slug));
+    return new Set(headings.filter(h => h.level === minLevel).map(h => h.slug));
   });
   const isScrollingRef = useRef(false);
   const tocRef = useRef<HTMLDivElement>(null);
@@ -72,11 +82,11 @@ export const TableOfContents = ({ headings }: TOCProps) => {
 
   // 更新折叠状态的函数
   const updateCollapsed = useCallback((slug: string) => {
-    const activeParents = getParentHeadings(headings, slug);
-    const currentTopLevel = getTopLevelParent(headings, slug);
+    const activeParents = getParentHeadings(headings, slug, minLevel);
+    const currentTopLevel = getTopLevelParent(headings, slug, minLevel);
 
     const allTopLevelSlugs = headings
-      .filter((h) => h.level === 2)
+      .filter((h) => h.level === minLevel)
       .map((h) => h.slug);
 
     setCollapsed(() => {
@@ -89,7 +99,7 @@ export const TableOfContents = ({ headings }: TOCProps) => {
       activeParents.forEach((s) => newSet.delete(s));
       return newSet;
     });
-  }, [headings]);
+  }, [headings, minLevel]);
 
   // 滚动 TOC 容器使活动项可见
   const scrollTocToActiveItem = (slug: string) => {
@@ -366,8 +376,8 @@ export const TableOfContents = ({ headings }: TOCProps) => {
     );
   };
 
-  // 获取顶级标题（level 2）
-  const topLevelHeadings = headings.filter((h) => h.level === 2);
+  // 获取顶级标题（动态检测的最小 level）
+  const topLevelHeadings = headings.filter((h) => h.level === minLevel);
 
   return (
     <nav className="sticky top-24" aria-label={ariaConfig.tableOfContents.nav}>
