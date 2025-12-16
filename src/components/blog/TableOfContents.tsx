@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { Heading } from '@/lib/mdx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
@@ -69,7 +69,7 @@ const getParentHeadings = (
 export const TableOfContents = ({ headings }: TOCProps) => {
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   // 计算文章中的最小 level（最顶级的标题层级）
-  const minLevel = getMinLevel(headings);
+  const minLevel = useMemo(() => getMinLevel(headings), [headings]);
   // 默认折叠所有顶级标题
   const [collapsed, setCollapsed] = useState<Set<string>>(() => {
     return new Set(headings.filter(h => h.level === minLevel).map(h => h.slug));
