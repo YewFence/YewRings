@@ -15,58 +15,58 @@
 
 ## ✨ 特性
 
-- 🪟 **玻璃风格 UI** - 灵感来自 Apple Liquid Glass 设计语言，增加毛玻璃效果
-- 🎨 **动态渐变背景** - 流动的液态网格背景，配合噪点纹理层
-- 🚀 **极致性能** - 基于 Next.js 16 App Router 构建，支持 SSG 静态生成
-- ✍️ **MDX 支持** - 使用 MDX 编写博客，支持 GFM、数学公式 (KaTeX)
-- 🎭 **丝滑动画** - Framer Motion 驱动的页面过渡与交互动画
-- 📱 **响应式设计** - 完美适配移动端、平板与桌面设备
-- 🌙 **深色主题** - 专为深色模式优化的视觉体验
+- 🪟 **玻璃风格 UI** - 灵感来自 Apple Liquid Glass 设计语言，增加毛玻璃效果与流光边框
+- 🎨 **动态视差背景** - 流动的液态网格背景，配合噪点纹理层，随滚动产生视差
+- 🚀 **极致性能** - 基于 Next.js 16 App Router 构建，支持 SSG 静态生成与 Docker 独立部署
+- ✍️ **MDX 深度集成** - 支持 GFM、数学公式 (KaTeX)、自定义组件，自动化图片管理
+- 🎭 **丝滑交互** - Framer Motion 驱动的页面过渡、滚动视差与手势交互
+- 📱 **全端适配** - 完美适配移动端、平板与桌面设备，支持 PWA 基础配置
+- 🌙 **深色模式** - 专为深色模式优化的视觉体验，霓虹配色点缀
 
 ## 🛠️ 技术栈
 
-| 类别 | 技术 |
-|------|------|
-| **框架** | Next.js 16, React 19 |
-| **样式** | Tailwind CSS 4, CSS Variables |
-| **动画** | Framer Motion |
-| **内容** | MDX, gray-matter |
-| **语法增强** | remark-gfm, remark-math, rehype-katex |
-| **包管理** | pnpm |
-| **语言** | TypeScript 5 |
+| 类别 | 技术 | 版本 |
+|------|------|------|
+| **框架** | Next.js | 16 (App Router) |
+| **核心** | React | 19 |
+| **样式** | Tailwind CSS | 4 |
+| **动画** | Framer Motion | 12 |
+| **内容** | MDX | v2 |
+| **部署** | Docker | Multi-stage Build |
+| **包管理** | pnpm | 10+ |
 
 ## 📁 项目结构
 
-```
+```text
 yew-rings/
-├── content/                # 内容目录
-│   ├── meta.json          # 全局元数据
+├── content/                # 内容源 (Git 追踪)
+│   ├── images/            # 原始图片资源 (会被自动复制到 public)
+│   ├── meta.json          # 全局元数据 (默认作者等)
 │   ├── pages/             # 页面文案配置 (JSON)
-│   │   └── categories.json # 分类显示名称和描述
+│   │   ├── categories.json # 分类配置
+│   │   └── *.json         # 各页面文案
 │   └── posts/             # 博客文章 (MDX)
 │       └── {category}/    # 按文件夹分类
-├── public/                # 静态资源
+├── public/                # 静态资源 (自动生成/手动放置)
+├── scripts/               # 构建工具脚本
+│   └── copy-images.mjs    # 图片自动同步脚本
 ├── src/
-│   ├── app/              # Next.js App Router
-│   │   ├── about/        # 关于页面
-│   │   └── blog/         # 博客页面
-│   ├── components/       # React 组件
-│   │   ├── ui/          # 通用 UI 组件 (GlassCard, Navbar...)
-│   │   ├── blog/        # 博客相关组件
-│   │   ├── home/        # 首页组件
-│   │   └── essay/       # 随笔时间轴组件
-│   ├── constants/       # 常量定义
-│   ├── contexts/        # React Context
-│   └── lib/             # 工具函数 (MDX 处理, 内容加载)
-└── scripts/             # 构建脚本
+│   ├── app/              # Next.js App Router 路由
+│   ├── components/       # React 组件库
+│   │   ├── ui/          # 通用玻璃拟态组件
+│   │   ├── blog/        # 博客业务组件
+│   │   └── mdx/         # MDX 自定义组件
+│   ├── lib/             # 核心逻辑 (MDX 解析, 内容加载)
+│   └── styles/          # 全局样式
+└── docker-compose.yml   # 容器编排配置
 ```
 
 ## 🚀 快速开始
 
 ### 环境要求
 
-- Node.js 18+
-- pnpm 8+
+- Node.js 20+
+- pnpm 9+
 
 ### 安装依赖
 
@@ -74,181 +74,98 @@ yew-rings/
 pnpm install
 ```
 
-### 启动开发服务器
-
-```bash
-pnpm dev
-```
-
-访问 [http://localhost:3000](http://localhost:3000) 查看效果。
-
-### 构建生产版本
-
-```bash
-pnpm build
-pnpm start
-```
-
-## 自定义网站
-编辑 `content/pages/*.json` 文件，自由修改站点各个页面的名称、标题和描述：
-
-## ✍️ 写作指南
-
-### 默认元信息
-在 `content/meta.json` 中配置默认的文章元信息：
-
-示例：
-
-```json
-{
-  "default": {
-    "author": "YewFence"
-  }
-}
-```
-
-### 创建新文章
-
-在 `content/posts/{category}/` 目录下创建 `.mdx` 文件，文件夹名即为分类名：
-
-```mdx
----
-title: 文章标题      # 随笔类型时可以省略
-date: 2024-01-01
-description: 文章描述
-time: "auto"        # 可选，自动获取文件修改时间
-updated: "auto"     # 可选，自动获取更新日期
-author: 作者名称     # 可选，默认使用 meta.json 中的配置
----
-
-文章内容...
-```
-
-> 💡 生产环境会自动过滤 `test` 分类和 `test` 前缀的文章
-
-### 支持的 Markdown 特性
-
-- ✅ GitHub Flavored Markdown (表格、任务列表、删除线等)
-- ✅ 数学公式 (KaTeX): 行内 `$E=mc^2$` 或块级 `$$...$$`
-- ✅ 代码高亮
-- ✅ 自动生成目录 (TOC)
-
-## 📜 脚本命令
+### 开发命令
 
 | 命令 | 描述 |
 |------|------|
-| `pnpm dev` | 启动开发服务器 |
-| `pnpm build` | 构建生产版本 |
-| `pnpm start` | 启动生产服务器 |
-| `pnpm lint` | 运行 ESLint 检查 |
-| `pnpm tests:hide` | 隐藏测试文章 |
-| `pnpm tests:show` | 显示测试文章 |
+| `pnpm dev` | 启动本地开发服务器 (`http://localhost:3000`) |
+| `pnpm build` | 构建生产版本 (默认静态导出至 `out/` 或 Standalone) |
+| `pnpm build:test` | **构建包含测试文章的版本** (设置 `INCLUDE_TEST_POSTS=true`) |
+| `pnpm lint` | 代码质量检查 |
+
+> **注意**: `pnpm build` 默认会忽略 `content/posts/test` 目录及以 `test` 开头的文章。如需预览测试文章，请使用 `pnpm build:test`。
+
+## ✍️ 写作与内容管理
+
+### 1. 创建文章
+
+在 `content/posts/{category}/` 目录下创建 `.mdx` 文件。文件夹名自动作为**分类**。
+
+```mdx
+---
+title: "文章标题"
+date: "2024-03-20"
+description: "简短的描述，用于列表页展示"
+time: "auto"        # 自动获取文件创建时间
+updated: "auto"     # 自动获取文件修改时间
+author: "YewFence"  # 可选，覆盖默认作者
+---
+
+这里是正文内容...
+```
+
+### 2. 图片管理
+
+将文章图片放入 `content/images/` 目录。
+运行 `pnpm dev` 或 `pnpm build` 时，脚本会自动将其复制到 `public/images/posts/`。
+
+在 MDX 中引用：
+
+```markdown
+![图片描述](/images/posts/my-image.png)
+```
+
+### 3. 测试文章
+
+- 将文章放在 `content/posts/test/` 目录下，或文件名以 `test-` 开头。
+- 这些文章在默认生产构建中会被**自动隐藏**。
+- 使用 `pnpm build:test` 可强制包含它们以便预览。
 
 ## 🐳 Docker 部署
 
-本项目支持使用 Docker 和 Docker Compose 进行容器化部署。
+项目完全支持 Docker 化部署，提供开发与生产两套配置。
 
-### 快速启动
+### 开发环境 (支持热重载)
 
-#### 1. 创建 override 配置文件
-
-```bash
-cp docker-compose.override.yml.example docker-compose.override.yml
-```
-
-根据需要编辑 `docker-compose.override.yml`，配置端口映射或网络设置。
-
-#### 2. 生产环境部署
-
-```bash
-# 构建并启动
-docker compose up -d --build
-
-# 查看日志
-docker compose logs -f web
-
-# 停止服务
-docker compose down
-```
-
-#### 3. 开发环境（支持热重载）
+使用 `dev` profile 启动容器，挂载本地目录实现代码与内容的热更新。
 
 ```bash
 docker compose --profile dev up dev
 ```
 
-### 配置说明
+### 生产环境
 
-| 文件 | 说明 |
-|------|------|
-| `Dockerfile` | 生产环境多阶段构建，使用 standalone 模式优化镜像 |
-| `Dockerfile.dev` | 开发环境，支持热重载 |
-| `docker-compose.yml` | 主配置文件 |
-| `docker-compose.override.yml` | 本地配置覆盖（已被 git 忽略） |
-| `.dockerignore` | Docker 构建时忽略的文件 |
-
-### Override 配置示例
-
-**直接暴露端口：**
-
-```yaml
-services:
-  web:
-    ports:
-      - "3000:3000"
-```
-
-**使用 Nginx 反向代理：**
-
-```yaml
-services:
-  web:
-    networks:
-      - nginx-proxy-network
-
-networks:
-  nginx-proxy-network:
-    external: true
-```
-
-### 常用命令
+生产环境使用多阶段构建 (Multi-stage build) 产出最小化的 Standalone 镜像。
 
 ```bash
-# 仅构建镜像
-docker compose build
+# 1. 创建本地配置覆盖 (可选)
+cp docker-compose.override.yml.example docker-compose.override.yml
 
-# 重新构建并启动
-docker compose up -d --build
+# 2. 构建并启动
+docker compose up -d --build blog
 
-# 查看容器状态
-docker compose ps
-
-# 进入容器
-docker compose exec web sh
-
-# 清理所有容器和镜像
-docker compose down --rmi all
+# 3. 查看日志
+docker compose logs -f blog
 ```
 
-### 更新文章
+**关于内容更新：**
+生产环境容器挂载了 `content` 目录。
+- **添加/修改文章**: 虽然目录已挂载，但由于 Next.js SSG 机制，通常需要**重启或重新构建容器**才能让静态页面生效。
+- **新增动态路由**: 如果启用了 ISR 或动态参数，新页面可能即时生效。
 
-由于 Next.js 生产模式使用 **静态生成 (SSG)**，页面在构建时已生成为 HTML 文件。
-
-**开发环境：** 修改 `content/` 目录下的文章后，Next.js 会自动热重载，无需任何操作。
-
-**生产环境：** 修改文章后需要重新构建镜像：
-
+建议每次更新内容后执行：
 ```bash
-docker compose up -d --build web
+docker compose up -d --build blog
 ```
 
-> ⚠️ 仅重启容器 (`docker compose restart`) 不会更新文章内容，必须重新构建。
-
-## 🎨 设计理念
+## 🎨 设计系统
 
 **年轮 (Rings)** 象征着时间的沉淀与成长的痕迹。正如树木的年轮记录着每一年的故事，这个博客记录着学习路上的每一个脚印。
 
-采用液态玻璃 (Liquid Glass) 设计语言，营造沉浸式的阅读体验——半透明的玻璃卡片、流动的渐变背景、细腻的动画过渡，让技术笔记也能赏心悦目。
+采用 **"Liquid Glass"** 设计语言：
+- **色彩**: 深邃的蓝紫色调，搭配青色/粉色霓虹点缀。
+- **材质**: 高度依赖 `backdrop-filter: blur()` 实现毛玻璃质感，配合半透明边框。
+- **动效**: 强调流体感，页面切换如水流般自然，卡片悬停伴随光效流动。
 
 ## 📄 许可证
 

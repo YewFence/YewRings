@@ -43,10 +43,10 @@ function getAllPostFiles(): PostFile[] {
       if (entry.isDirectory()) {
         // 递归扫描子目录，子目录名作为分类（统一转小写）
         scanDirectory(fullPath, entry.name.toLowerCase());
-      } else if (entry.isFile() && entry.name.endsWith('.mdx')) {
+      } else if (entry.isFile() && (entry.name.endsWith('.mdx') || entry.name.endsWith('.md'))) {
         results.push({
           filePath: fullPath,
-          slug: entry.name.replace(/\.mdx$/, ''),
+          slug: entry.name.replace(/\.mdx?$/, ''),
           category,  // 来自文件夹名，根目录文章为 undefined
         });
       }
@@ -56,7 +56,8 @@ function getAllPostFiles(): PostFile[] {
   scanDirectory(postsDirectory);
 
   // 生产环境过滤测试文章：test 分类 或 文件名以 test 开头
-  if (process.env.NODE_ENV === 'production') {
+  // 可以通过设置环境变量 INCLUDE_TEST_POSTS=true 来包含测试文章
+  if (process.env.NODE_ENV === 'production' && process.env.INCLUDE_TEST_POSTS !== 'true') {
     postFilesCache = results.filter((post) =>
       post.category !== 'test' && !post.slug.startsWith('test')
     );
