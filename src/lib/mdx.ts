@@ -128,6 +128,19 @@ interface HeadingNode extends Node {
 }
 
 /**
+ * 标准化日期格式
+ * 支持 Date 对象（YAML 不带引号的日期）和字符串（带引号的日期）
+ * @param date 日期值，可能是 Date 对象或字符串
+ * @returns 标准化后的日期字符串 (YYYY-MM-DD)
+ */
+function normalizeDate(date: string | Date): string {
+  if (date instanceof Date) {
+    return date.toISOString().split('T')[0];
+  }
+  return date;
+}
+
+/**
  * 处理文章的时间字段
  * @param dataTime frontmatter 中的 time 值
  * @param filePath 文件路径（用于获取文件修改时间）
@@ -205,17 +218,18 @@ export function getSortedPostsData(): PostMeta[] {
   const allPostsData = postFiles.map(({ filePath, slug, category: folderCategory }) => {
     const fileContents = fs.readFileSync(filePath, 'utf8');
     const { data } = matter(fileContents);
+    const date = normalizeDate(data.date);
 
     const postData: PostMeta = {
       slug,
-      date: data.date,
+      date,
       title: data.title,
       description: data.description,
       author: data.author,
       // 优先使用文件夹名作为分类，fallback 到 frontmatter
       category: folderCategory || data.category,
       time: resolveTime(data.time, filePath),
-      updatedAt: resolveUpdatedAt(data.updated, filePath, data.date),
+      updatedAt: resolveUpdatedAt(data.updated, filePath, date),
     };
 
     return postData;
@@ -234,6 +248,7 @@ export function getPostData(slug: string) {
   const fileContents = fs.readFileSync(filePath, 'utf8');
   const { content, data } = matter(fileContents);
   const defaultMeta = getDefaultMeta();
+  const date = normalizeDate(data.date);
 
   const headings = extractHeadings(content);
 
@@ -241,14 +256,14 @@ export function getPostData(slug: string) {
   const author = data.author || defaultMeta.author || '';
 
   const meta: Omit<PostMeta, 'slug'> = {
-    date: data.date,
+    date,
     title: data.title,
     description: data.description,
     // 优先使用文件夹名作为分类，fallback 到 frontmatter
     category: folderCategory || data.category,
     author,
     time: resolveTime(data.time, filePath),
-    updatedAt: resolveUpdatedAt(data.updated, filePath, data.date),
+    updatedAt: resolveUpdatedAt(data.updated, filePath, date),
   };
 
   return {
@@ -275,10 +290,11 @@ export function getPostsWithContent(category?: string): PostWithContent[] {
   const posts = postFiles.map(({ filePath, slug, category: folderCategory }) => {
     const fileContents = fs.readFileSync(filePath, 'utf8');
     const { content, data } = matter(fileContents);
+    const date = normalizeDate(data.date);
 
     const post: PostWithContent = {
       slug,
-      date: data.date,
+      date,
       title: data.title || '', // 标题可为空
       description: data.description || '',
       author: data.author,
@@ -286,7 +302,7 @@ export function getPostsWithContent(category?: string): PostWithContent[] {
       category: folderCategory || data.category,
       content,
       time: resolveTime(data.time, filePath),
-      updatedAt: resolveUpdatedAt(data.updated, filePath, data.date),
+      updatedAt: resolveUpdatedAt(data.updated, filePath, date),
     };
 
     return post;
