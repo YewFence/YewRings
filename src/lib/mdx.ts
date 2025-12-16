@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
+import { CATEGORY_ESSAY } from '@/constants/categories';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import { visit } from 'unist-util-visit';
@@ -127,6 +128,33 @@ interface HeadingNode extends Node {
   children: TextNode[];
 }
 
+// 时段常量
+const TIME_PERIODS = ['深夜', '早上', '中午', '下午', '夜晚'] as const;
+type TimePeriod = (typeof TIME_PERIODS)[number];
+
+/**
+ * 将小时转换为时段名称
+ * - 早上：6:00 - 11:59
+ * - 中午：12:00 - 13:59
+ * - 下午：14:00 - 17:59
+ * - 夜晚：18:00 - 21:59
+ * - 深夜：22:00 - 5:59
+ */
+function hourToTimePeriod(hour: number): TimePeriod {
+  if (hour >= 6 && hour < 12) return '早上';
+  if (hour >= 12 && hour < 14) return '中午';
+  if (hour >= 14 && hour < 18) return '下午';
+  if (hour >= 18 && hour < 22) return '夜晚';
+  return '深夜';
+}
+
+/**
+ * 判断字符串是否为有效的时段名称
+ */
+function isTimePeriod(value: string): value is TimePeriod {
+  return (TIME_PERIODS as readonly string[]).includes(value);
+}
+
 /**
  * 标准化日期格式
  * 支持 Date 对象（YAML 不带引号的日期）和字符串（带引号的日期）
@@ -159,15 +187,41 @@ function resolveDate(date: string | Date | undefined, filePath: string): string 
  * 处理文章的时间字段
  * @param dataTime frontmatter 中的 time 值
  * @param filePath 文件路径（用于获取文件修改时间）
+ * @param isEssay 是否为随笔分类（随笔自动获取时间并显示时段）
  * @returns 格式化后的时间字符串，或 undefined
  */
-function resolveTime(dataTime: string | undefined, filePath: string): string | undefined {
+function resolveTime(
+  dataTime: string | undefined,
+  filePath: string,
+  isEssay: boolean
+): string | undefined {
+  // 随笔：没有 time 字段时自动获取
+  if (isEssay && !dataTime) {
+    const stats = fs.statSync(filePath);
+    return hourToTimePeriod(stats.mtime.getHours());
+  }
+
   if (!dataTime) return undefined;
 
+  // 如果已经是时段名称，直接返回
+  if (isTimePeriod(dataTime)) return dataTime;
+
+  // auto: 从文件修改时间获取
   if (dataTime === 'auto') {
     const stats = fs.statSync(filePath);
-    const mtime = stats.mtime;
-    return `${String(mtime.getHours()).padStart(2, '0')}:${String(mtime.getMinutes()).padStart(2, '0')}`;
+    const hour = stats.mtime.getHours();
+    if (isEssay) {
+      return hourToTimePeriod(hour);
+    }
+    const minutes = stats.mtime.getMinutes();
+    return `${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+  }
+
+  // 解析 HH:mm 格式并转换为时段（仅随笔）
+  const match = dataTime.match(/^(\d{1,2}):(\d{2})$/);
+  if (match && isEssay) {
+    const hour = parseInt(match[1], 10);
+    return hourToTimePeriod(hour);
   }
 
   return dataTime;
@@ -178,13 +232,21 @@ function resolveTime(dataTime: string | undefined, filePath: string): string | u
  * @param dataUpdated frontmatter 中的 updated 值
  * @param filePath 文件路径（用于获取文件修改时间）
  * @param date 文章创建日期（用于比较是否需要显示更新日期）
+ * @param isEssay 是否为随笔分类（随笔自动获取更新日期）
  * @returns 更新日期字符串，如果与创建日期相同则返回 undefined
  */
 function resolveUpdatedAt(
   dataUpdated: string | undefined,
   filePath: string,
-  date: string
+  date: string,
+  isEssay: boolean
 ): string | undefined {
+  // 随笔：没有 updated 字段时自动获取
+  if (isEssay && !dataUpdated) {
+    const updatedAt = fs.statSync(filePath).mtime.toISOString().split('T')[0];
+    return updatedAt !== date ? updatedAt : undefined;
+  }
+
   if (!dataUpdated) return undefined;
 
   const updatedAt =
@@ -234,6 +296,8 @@ export function getSortedPostsData(): PostMeta[] {
     const fileContents = fs.readFileSync(filePath, 'utf8');
     const { data } = matter(fileContents);
     const date = resolveDate(data.date, filePath);
+    const category = folderCategory || data.category;
+    const isEssay = category?.toLowerCase() === CATEGORY_ESSAY;
 
     const postData: PostMeta = {
       slug,
@@ -242,9 +306,9 @@ export function getSortedPostsData(): PostMeta[] {
       description: data.description,
       author: data.author,
       // 优先使用文件夹名作为分类，fallback 到 frontmatter
-      category: folderCategory || data.category,
-      time: resolveTime(data.time, filePath),
-      updatedAt: resolveUpdatedAt(data.updated, filePath, date),
+      category,
+      time: resolveTime(data.time, filePath, isEssay),
+      updatedAt: resolveUpdatedAt(data.updated, filePath, date, isEssay),
     };
 
     return postData;
@@ -264,6 +328,8 @@ export function getPostData(slug: string) {
   const { content, data } = matter(fileContents);
   const defaultMeta = getDefaultMeta();
   const date = resolveDate(data.date, filePath);
+  const category = folderCategory || data.category;
+  const isEssay = category?.toLowerCase() === CATEGORY_ESSAY;
 
   const headings = extractHeadings(content);
 
@@ -275,10 +341,10 @@ export function getPostData(slug: string) {
     title: data.title,
     description: data.description,
     // 优先使用文件夹名作为分类，fallback 到 frontmatter
-    category: folderCategory || data.category,
+    category,
     author,
-    time: resolveTime(data.time, filePath),
-    updatedAt: resolveUpdatedAt(data.updated, filePath, date),
+    time: resolveTime(data.time, filePath, isEssay),
+    updatedAt: resolveUpdatedAt(data.updated, filePath, date, isEssay),
   };
 
   return {
@@ -306,6 +372,8 @@ export function getPostsWithContent(category?: string): PostWithContent[] {
     const fileContents = fs.readFileSync(filePath, 'utf8');
     const { content, data } = matter(fileContents);
     const date = resolveDate(data.date, filePath);
+    const postCategory = folderCategory || data.category;
+    const isEssay = postCategory?.toLowerCase() === CATEGORY_ESSAY;
 
     const post: PostWithContent = {
       slug,
@@ -314,10 +382,10 @@ export function getPostsWithContent(category?: string): PostWithContent[] {
       description: data.description || '',
       author: data.author,
       // 优先使用文件夹名作为分类，fallback 到 frontmatter
-      category: folderCategory || data.category,
+      category: postCategory,
       content,
-      time: resolveTime(data.time, filePath),
-      updatedAt: resolveUpdatedAt(data.updated, filePath, date),
+      time: resolveTime(data.time, filePath, isEssay),
+      updatedAt: resolveUpdatedAt(data.updated, filePath, date, isEssay),
     };
 
     return post;
