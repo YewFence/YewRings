@@ -1,8 +1,29 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Calendar, Clock } from "lucide-react";
-import type { ReactNode } from "react";
+import { Calendar, Sunrise, Sun, CloudSun, Sunset, Moon } from "lucide-react";
+import type { ReactNode, ComponentType } from "react";
+import type { LucideProps } from "lucide-react";
+
+/**
+ * 根据时段名称返回对应的图标组件
+ */
+function getTimePeriodIcon(period: string): ComponentType<LucideProps> {
+  switch (period) {
+    case "早上":
+      return Sunrise;
+    case "中午":
+      return Sun;
+    case "下午":
+      return CloudSun;
+    case "夜晚":
+      return Sunset;
+    case "深夜":
+      return Moon;
+    default:
+      return Sun;
+  }
+}
 
 interface EssayTimelineCardProps {
   title?: string;
@@ -48,7 +69,10 @@ export function EssayTimelineCard({
         </span>
         {time && (
           <span className="flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5" />
+            {(() => {
+              const Icon = getTimePeriodIcon(time);
+              return <Icon className="w-3.5 h-3.5" />;
+            })()}
             {time}
           </span>
         )}
