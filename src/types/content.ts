@@ -125,3 +125,16 @@ export interface NotFoundPageContent {
     blog: string;
   };
 }
+
+// Health 页面内容 (health.json)
+export interface HealthPageContent {
+  metadata: PageMetadata;
+  title: string;
+  subtitle: string;
+  badge: string;
+  info: {
+    statusLabel: string;
+    statusValue: string;
+    timeLabel: string;
+  };
+}
