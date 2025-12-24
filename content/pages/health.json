@@ -1,0 +1,14 @@
+{
+  "metadata": {
+    "title": "健康检查 | YewRings",
+    "description": "系统健康状态检查"
+  },
+  "title": "系统运行正常",
+  "subtitle": "All Systems Operational",
+  "badge": "服务健康",
+  "info": {
+    "statusLabel": "状态码",
+    "statusValue": "200 OK",
+    "timeLabel": "检查时间"
+  }
+}

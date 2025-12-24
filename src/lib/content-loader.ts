@@ -9,6 +9,7 @@ import type {
   MetaContent,
   PageMetadata,
   NotFoundPageContent,
+  HealthPageContent,
 } from '@/types/content';
 
 const contentDirectory = path.join(process.cwd(), 'content/pages');
@@ -22,6 +23,7 @@ type PageContentMap = {
   post: PostPageContent;
   home: HomePageContent;
   'not-found': NotFoundPageContent;
+  health: HealthPageContent;
 };
 
 export function getPageContent<K extends keyof PageContentMap>(pageName: K): PageContentMap[K];
