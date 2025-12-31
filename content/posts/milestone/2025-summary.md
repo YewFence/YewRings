@@ -40,6 +40,9 @@ category: milestone
 
 我觉得 AB 完全值得我单开一章讲，毕竟这可以说是我大学生活中最**浓墨重彩的一笔**了。一切的起源要从一个神奇的小任务说起，在 icezone 的引导下我也是写出了[我的第一个网站](https://yewyard.cn)，非常朴素，非常 AI （笑）。但是也是成功引起了两位前辈 [ice](https://github.com/ICE-awa) 和 [AptS:1547](https://me.esaps.net/) 的注意，天知道我当时被两位前辈主动加好友有多开心！
 
+![初次见面，前辈](2025-summary.1547-first-encounter.jpg)
+> 初次见面，前辈
+
 > 国庆那会抽出时间把网站写出来绝对是我这个学期做出的最正确的决定。
 
 后来就是在 47 的邀请下进入了 Autobits，这个可以说是我们校区最有含金量的科技社团之一。然后进来发现怎么 ice 也在里面摸鱼（挺好的），~~虽然我还没怎么给 AB 贡献代码啦，考完就去写~~。如我所愿的，也是接触到了很多好厉害的前辈们，像是 [别为馒头](https://www.ygxz.in/)，[uaih3k9x](https://github.com/uaih3k9x)，[Orange~](https://github.com/Orange20000922)。还有一些和我同届的同学，像是 [ZnLuAr](https://github.com/ZnLuAr)。都是很好的人呢。
@@ -63,6 +66,9 @@ category: milestone
 
 分工明确这一块。
 
+![Gemini 老师救我](2025-summary.with-gemini.png)
+> Gemini 老师救我
+
 ### MCP
 
 天才的发明，让 CLI 无缝连接各个工具，最省事的一集。接一个 MCP，一切都会好起来的。
@@ -82,6 +88,9 @@ category: milestone
 - 我的神奇主页的后端。~~虽然我回头打算拿 Go 重写~~
 - 一些连接 LLM API 的小程序。
 - 简单的爬虫。
+  
+![Python 是对的](2025-summary.python-is-right.png)
+> Python 是对的
 
 ### DevOps
 
@@ -103,6 +112,9 @@ Python Flask -> TypeScript Express -> *Go Gin ~~计划中（逃~~*
 首先，非常感谢馒头哥赞助的 VPS（虚拟专用服务器）。由此，我踏上了学习运维的第一步。
 
 ##### Linux
+
+![Hello Mikan](2025-summary.server-mikan.png)
+> Hello Mikan
 
 正在操作高雅系统 Linux.jpg  
 以前的梦想就是能在 Linux 黑乎乎的命令行里敲各种各样的命令，当时也是闲着没事装虚拟机，然后不知道该干嘛。现在就很明确了——把网站部署上线。于是乎现在也是开始整 Linux 了，嗯准确的说，Debian（蝶变）系统。从把公钥放进 `~/.ssh/authorized_keys` 再到 `sudo useradd yewfence` 把密码登录一关，`docker` 一装，再来点 `oh my zsh` 和 `tmux` ，真好玩吧。
@@ -132,6 +144,9 @@ Python Flask -> TypeScript Express -> *Go Gin ~~计划中（逃~~*
 - **Fork：** 发现一个好玩的东西，但是它少了一个我想要的功能怎么办？ Fork 别人仓库，自己写😋开源魅力时刻。
 - **PR：** 偶尔也会找机会给别人贡献代码，虽然不多啦，虽然自己水平也不算好，但是还是会继续尝试的，这才是开源社区的意义嘛。
 - **Force Push：** 偶尔发现自己写错一两个东西，悄悄强制推送，反正我的仓库没人和我协作（
+  
+![看来我今年写的东西还挺多的嘛](2025-summary.my-github.png)
+> 看来我今年写的东西还挺多的嘛
 
 > [YewFence On GitHub](https://github.com/YewFence/) 欢迎来看我最近又新写了什么东西😁
 
@@ -144,6 +159,9 @@ Python Flask -> TypeScript Express -> *Go Gin ~~计划中（逃~~*
 - **Matrix：** 不想让自己的聊天记录被厂商管控，于是自己搭了一个 Matrix 服务器，~~虽然没人用~~。
 - **Gitea：** 不想在 GitHub 上给自己的历史记录织毛衣，但是又想备份自己的完整 Git 历史，那就自己托管一个 Git 云平台吧。
 
+![自托管这一块](2025-summary.self-host-gitea.png)
+> 自托管这一块
+
 然后就是给我的各个服务起名字，给我的词汇量提出了巨大的挑战🥲Gemini 救我。最后定下来一个习惯：我的服务/项目都是 Yew 开头，取各个相关的意象，清晰而有个人风格，像是 YewTrack，YewResin，YewGrove 之类的。
 
 > 中二病（并非  
@@ -154,6 +172,9 @@ Python Flask -> TypeScript Express -> *Go Gin ~~计划中（逃~~*
 伟大，超级慷慨免费层服务，保护我的 VPS，免费 DNS 解析，免费邮件路由，免费前端/后端（Page/Worker）服务托管，实惠的域名续费。
 
 > 欢迎发邮件给 hello@yewfence.me 🤗 自己的邮箱域名，真好玩吧，~~虽然明年续费就不好玩了~~
+
+![Cloudflare 真好用吧](2025-summary.my-domain-in-cf.png)
+> Cloudflare 真好用吧
 
 -----
 ## 娱乐
