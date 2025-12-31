@@ -119,7 +119,11 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           {/* 文章正文容器 */}
           <BlogPostGlassCard className="p-4 sm:p-8 md:p-12">
             <BlogPostContent>
-              <article className="prose prose-invert md:prose-lg max-w-none prose-headings:font-bold prose-a:text-cyan-300 hover:prose-a:text-cyan-200">
+              <article className="prose prose-invert md:prose-lg max-w-none 
+              prose-headings:font-bold prose-a:text-cyan-300 hover:prose-a:text-cyan-200 
+              prose-blockquote:not-italic prose-blockquote:text-(--color-prose-body) 
+              prose-blockquote:prose-p:before:content-none 
+              prose-blockquote:prose-p:after:content-none">
                 <MDXRemote
                   source={content}
                   components={mdxComponents}
