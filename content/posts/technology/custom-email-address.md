@@ -1,12 +1,13 @@
 ---
-title: '告别“完全自建”，自定义域名邮箱的收发信全攻略：Cloudflare Email Routing + Brevo SMTP Relay 实战'
+title: '告别“完全自建”，自定义域名邮箱的收发信全攻略：Cloudflare Email Routing + Resend SMTP Relay 实战'
 date: '2025-12-10'
-description: '满怀激情地想自建一个酷炫的电子邮局，结果折腾三天后发现，这对于个人开发者来说简直是个安全黑洞和运维噩梦。最终我放弃了“完全自建”，选择了 Cloudflare + Brevo 的组合拳。这套方案不仅零成本，还能完美隐藏服务器 IP，让我可以安心写代码，而不是天天担心服务器被黑。如果你也想省心，这篇文章就是你需要的。'
+updated: 'auto'
+description: '满怀激情地想自建一个酷炫的电子邮局，结果折腾三天后发现，这对于个人开发者来说简直是个安全黑洞和运维噩梦。最终我放弃了“完全自建”，选择了 Cloudflare + Resend 的组合拳。这套方案不仅零成本，还能完美隐藏服务器 IP，让我可以安心写代码，而不是天天担心服务器被黑。如果你也想省心，这篇文章就是你需要的。'
 category: "technology"
 ---
 前段时间，在前辈硬核教程的感召下，我满怀热情地尝试在自己的服务器上部署 **Stalwart**。作为一个计算机专业的学生，我觉得“拥有完全属于自己的数据”是一件很酷的事情。
 
-但在深入配置并在服务器上折腾三天后，我最终决定**彻底放弃完全自建方案**，转而使用了 **Cloudflare Email Routing + Brevo SMTP Relay** 的组合。
+但在深入配置并在服务器上折腾三天后，我最终决定**彻底放弃完全自建方案**，转而使用了 **Cloudflare Email Routing + Resend SMTP Relay** 的组合。
 
 这不仅仅是因为配置麻烦，更因为我意识到：对于个人开发者来说，完全自建邮局可能是一个“投入产出比”极低的深坑。不仅如此，**对于只有一两台轻量级服务器的个人开发者来说，完全自建邮局简直是一个安全黑洞。**
 
@@ -44,53 +45,54 @@ category: "technology"
 
 这让我感觉我不是在写代码做开发，而是在当一个全职的**系统运维（SysAdmin）**。
 
-## 回归理性：Cloudflare + Brevo 的“收发分离”架构
+## 回归理性：Cloudflare + Resend 的“收发分离”架构
 
 我想通了，既然我的需求只是“收发信”，为什么要承担运营基础设施的风险？于是我转向了组合拳方案。这个方案的核心思想是：**专业的人做专业的事**。
 
-* **收信端：Cloudflare Email Routing**
-* **发信端：Brevo (原 Sendinblue) SMTP Relay**
+* **收信端：Cloudflare Email Routing + Worker**
+* **发信端：Resend SMTP Relay**
 
-### 1. 接收：Cloudflare 的隐形盾牌
-利用 Cloudflare 的 Email Routing 功能，我配置了自定义域名邮箱（比如 `me@example.com`）转发到我的 Gmail。
-* **优势**：完全不需要在 VPS 上运行由 24 小时监听的收件服务，节省了大量的内存和 CPU（对我那台 6GB 内存的 VPS 来说是种解脱）。
-* **隐私**：隐藏了源站 IP，且 Cloudflare 的抗攻击能力毋庸置疑。
+### 1. 接收：Cloudflare Email Routing + Worker
+利用 Cloudflare 的 Email Routing 功能，我配置了自定义域名邮箱（比如 `me@example.com`）转发到我的 **Email Worker**，完全不需要自己建立邮局。
 
-### 2. 发送：借力 Brevo 的高信誉通道
-发送是难点，但我不需要自己发。我注册了 **Brevo** 的免费版（每天 300 封额度，对个人绰绰有余），利用它的 SMTP Relay 服务。
-> 如果你不了解如何配置 Brevo 提供的 SMTP relay服务，我的另一篇文章《[免费且强大的邮件推送服务：Brevo SMTP Relay 申请与配置指南](/blog/brevo-smtp-relay-guide)》里面有详细的配置步骤。
-* **优势**：走 587 端口，完美绕过 ISP 的 25 端口封锁。最重要的是，Brevo 的 IP 是经过预热的，送达率极高。
+> 简而言之，**Worker** 是 Cloudflare 的一个服务，能帮你无需服务器就可以托管一个网站，并且与它的电子邮件服务 **Email Routing** 无缝集成。
+
+这样一来我就得到了：
+* **多地址收件**：你可以在 Worker 里编写代码来处理收到的邮件，在网页上展示邮件内容，增加多个收件地址，就像一个真正的邮局。
+* **无服务器部署**：Cloudflare 作为收件方，我完全不需要考虑服务器的问题。
+* **免费且稳定**：Cloudflare 的 Worker 有很高的免费额度，而且它能直接享受到 Cloudflare 的 CDN 和安全防护。
+* **灵活转发**：我可以把邮件转发到任何我想要的邮箱，比如 Gmail、Outlook，你可以选择在你喜欢的邮件应用收信，和以前一样。甚至还可以发到其他平台，例如 Telegram。
+
+不会写代码？不用担心，不需要重复造轮子，已经有贡献者写好了一个开源的 [Cloud-Mail](https://github.com/maillab/cloud-mail)，你可以直接使用。部署完毕之后打开自动分配的 `workers.dev` 子域名，就能看到一个完整的 Web 邮箱界面，完全满足日常收发信需求。
+
+另外，实际上我也闲着没事自己二次开发了一下 Cloud-Mail，添加了一些我个人需要的功能，比如邮件文件下载，自动创建邮箱，网格视图模式邮箱地址预览等。如果你有兴趣，可以看看我的 [Cloud-Mail Fork](https://github.com/yewfence/cloud-mail)
+
+> 虽然说是开箱即用，但是部署 Cloud-Mail 还是需要一点点动手能力的，毕竟要配置各种杂七杂八的 API Token 和 R2 存储，这一部分具体可以参考[官方文档](https://doc.skymail.ink/guide/action.html)。
+
+![Cloud-Mail](custom-email-address.cloud-mail.png)
+
+> 实际上，我也尝试过用 Cloudflare Email Routing 直接转发到 Gmail/Outlook，但 Gmail/Outlook 对于“非官方”邮件服务器的邮件过滤非常严格，它不是丢进垃圾邮件分类，而是直接拒收了，在这种情况下邮件就会直接丢件，非常麻烦。而且这样转发延迟也很高，经常要等五六分钟，你还要去盯着 Cloudflare 的日志确认邮件是成功转发了还是丢件了，体验很差。所以我更推荐用 Worker 来处理邮件。
+
+### 2. 发送：借力 Resend
+发送是难点，但我不需要自己发。我注册了 **Resend** 的免费版（每月 1000 封额度，对个人绰绰有余），利用它的 SDK 就可以在 **Worker** 里面实现邮件发送。
+
+你只需要：
+1. 在 [Resend](https://resend.com) 注册账号
+2. 在[控制台](https://resend.com/domains)添加并验证你的域名
+3. 获取 [API Key](https://resend.com/api-keys)
+4. 把 Key 填入 Cloud-Mail `系统设置` 面板里
+
 
 ### 3. 关键点：身份的“合法化”
 很多人觉得用第三方发信就不“原生”了，其实只要配置好 DNS 记录，体验是一样的。
-* **SPF**：在 Cloudflare DNS 里 `include` Brevo 的记录。
-* **DKIM**：这是关键，用 Brevo 生成的密钥签名你的邮件，告诉收件方“这是经过域名所有者授权的”。
+* **SPF**：在 Cloudflare DNS 里根据引导配置好 Resend 的记录。
+* **DKIM**：这是关键，用 Resend 生成的密钥签名你的邮件，告诉收件方“这是经过域名所有者授权的”。
 * **DMARC**：配置好前两项后，DMARC 可以设置为 `p=quarantine` 甚至 `p=reject`，安全性拉满。
+> 看不懂这些概念？没关系，[Resend 的文档](https://resend.com/docs/dashboard/domains/introduction)里有详细的指导，一步步照着做就行了。
 
-## 客户端实操：如何在 Thunderbird 里“登录”我的电子邮箱？
-### 收信
-对于收信，可能有人会觉得一堆账号的邮件都堆在一个账号里不好管理，实际上解决方法也很简单
+> 至少我发给我的 outlook 邮箱的测试邮件完美通过了 SPF 和 DKIM 验证，没有进入垃圾箱。偶尔会被标记为“垃圾邮件”，但这更多是因为 Resend 的免费账户的 Shared IP 有时会被某些垃圾邮件黑名单误伤，这个问题对于个人用户来说影响不大。
 
-1. 在你的收转发邮件的邮箱账号里（比如 Gmail），给你的自定义域名新建一个文件夹(甚至可以给每一个自定义域名的每一个账号设置一个文件夹)
-2. 设置一个**过滤器**，把发往 `@yourdomain.com` 的邮件打上移动到对应的文件夹。
-
-这样，你就可以在 Gmail 里清晰地区分发往你自定义域名和发往你Gmail的邮件了。
-> 甚至，你可以专门注册一个 Gmail 账号，只用来收发你自定义域名的邮件，彻底隔离开来。
-
-### 发信
-这是我最想分享的一个 Tip。很多人以为用了转发服务，就只能用 Gmail 回信，导致暴露真实邮箱。其实 **Thunderbird（雷鸟）** 可以完美解决这个问题。
-
-你不需要在雷鸟里添加一个完整的 IMAP 账户，只需要利用它的 **“身份 (Identities)”** 功能：
-1.  在雷鸟的“发送服务器 (SMTP)”设置里，添加并选择 Brevo 的 SMTP 服务器（`smtp-relay.brevo.com`），就像是在各种自托管服务里配置 STMP 服务器一样，填入 Brevo 提供的用户名，端口 `587` ，连接安全选择 `STARTTLS`，验证方式选择 `普通密码`。
-2.  在你的主邮箱（如 Gmail）设置里，点击“管理标识...”，选择添加一个发件人身份。
-3.  添加你的域名邮箱 `you@yourdomain.com`，你自定义的发件人姓名，在发件服务器里选择你刚刚配置的 Brevo relay 服务器，注意，这里需要与你在 Brevo 配置的发件人信息一致，否则可能无法进行 STMP 转发。
-4.  然后，在写邮件时，你就可以从下拉菜单里选择用 `you@yourdomain.com` 作为发件人。
-5.  发送测试邮件，填写你的 SMTP API KEY 作为发件密码，检查收件箱，确认邮件通过 Brevo 发出，并且 SPF/DKIM 验证通过。
-6.  完成！
-
-> 至少我发给我的 outlook 邮箱的测试邮件完美通过了 SPF 和 DKIM 验证，没有进入垃圾箱。偶尔会被标记为“垃圾邮件”，但这更多是因为 Brevo 的免费账户的 Shared IP 有时会被某些垃圾邮件黑名单误伤，这个问题对于个人用户来说影响不大。
-
-**效果**：当你写信时，下拉菜单选择你的域名邮箱，邮件就会通过 Brevo 发出。对方看到的发件人是 `you@yourdomain.com`，且通过了 SPF/DKIM 验证，完全看不出 Gmail 的痕迹。
+**效果**：当你写信时，下拉菜单选择你的域名邮箱，邮件就会通过 Resend 以你的自定义身份发出。对方看到的发件人是 `you@yourdomain.com`，一切正常。
 
 ## 总结： Simple is Better
 
@@ -101,4 +103,4 @@ category: "technology"
 我想对看过前辈文章的同学们说：**学习原理时，自建邮局是很好的实验；但作为生产力工具，拥抱现代化的 SaaS 组合才是明智之选。**
 不要为了造邮局而造邮局，把时间省下来去写更有趣的代码吧
 
-现在的这套方案：**攻击面最小化（Zero Trust 友好）、IP 不泄露、维护成本为零**，已经完美满足了我“使用自己域名沟通”的需求。如果你也像我一样，只想安静地写代码、做网站，而不是每天盯着服务器日志提心吊胆，那么这才是你的最佳选择。
+现在的这套方案：**攻击面最小化（Zero Trust 友好）、IP 不泄露、维护成本为零**，已经完美满足了我“使用自己域名沟通”的需求。如果你也像我一样，只想安静地写代码、做网站，而不是每天盯着服务器日志提心吊胆，那么我相信这会是你的一个好选择。
